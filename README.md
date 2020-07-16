@@ -1,2 +1,2 @@
 # pimatic-floorplan
-Pimatic plugin to get floorplan in gui 
+Pimatic plugin for floorplans in gui 
