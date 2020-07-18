@@ -25,13 +25,12 @@ Save the created svg file in the public folder of pimatic-mobile-frontend. The f
 Create a floorplan device with the following configuration:
 ```
 floorplan: "the sgv filename of the floorplan"
-devices:
-  description: "list of devices used in the floorplan"
-     name: "The device name"
-     type: "The gui type of device
+devices: "list of devices used in the floorplan"
+  name: "The device name"
+  type: "The gui type of device
      ["switch","button","presence","light","sensor"]
-     pimatic_device_id: "The pimatic device Id"
-     pimatic_attribute_name:" The attribute name of the Pimatic device like state, presence or temperature"
+  pimatic_device_id: "The pimatic device Id"
+  pimatic_attribute_name:" The attribute name of the Pimatic device like state, presence or temperature"
 colors:
   description: "Array with Colors for the states in the floorplan device"
   	name: "Name of device state"
