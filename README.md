@@ -31,11 +31,10 @@ devices: "list of devices used in the floorplan"
      ["switch","button","presence","light","sensor"]
   pimatic_device_id: "The pimatic device Id"
   pimatic_attribute_name:" The attribute name of the Pimatic device like state, presence or temperature"
-colors:
-  description: "Array with Colors for the states in the floorplan device"
-  	name: "Name of device state"
-    	["switchOff", "switchOn", "presenceOff", "presenceOn", "buttonOff", "buttonOn", "lightOff", "lightOn"]
-  	color: "The hex color number for the the state, for example: #12DA0F"
+colors: "Array with Colors for the states in the floorplan device"
+  name: "Name of device state"
+    ["switchOff", "switchOn", "presenceOff", "presenceOn", "buttonOff", "buttonOn", "lightOff", "lightOn"]
+  color: "The hex color number for the the state, for example: #12DA0F"
 ```
 Add pimatic devices by there device-id, give them a logical type and optional color the states.
 
