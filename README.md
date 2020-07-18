@@ -9,7 +9,7 @@ some home-automation users want a more graphical representation of the gui. This
 ## description
 
 The plugin adds a gui option to create 1 or more floorplan devices, for viewing and controlling existing pimatic devices. The concept is as follows:
-- Scaleable Vector Graphics (svg) as graphical base for a floorplan.
+- Scalable Vector Graphics (svg) as graphical base for a floorplan.
 - Manual adding of devices that should be shown on the floorplan.
 - Free choice of shapes for background and the pimatic devices, as long as they are linked to pimatic (see Linking the floorplan svg and pimatic).
 - The supported devices are: switch, presence, light, button and sensor (text/value display).
@@ -55,5 +55,7 @@ The underscore between device id and attribute is important!
 
 The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
 
+## example
+< to be added >
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
