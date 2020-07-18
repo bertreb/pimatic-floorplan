@@ -29,14 +29,14 @@ devices:
   description: "list of devices used in the floorplan"
      name: "The device name"
      type: "The gui type of device
-     		["switch","button","presence","light","sensor"]
+     ["switch","button","presence","light","sensor"]
      pimatic_device_id: "The pimatic device Id"
      pimatic_attribute_name:" The attribute name of the Pimatic device like state, presence or temperature"
 colors:
   description: "Array with Colors for the states in the floorplan device"
   	name:
     	description: "Name of device state"
-    		["switchOff", "switchOn", "presenceOff", "presenceOn", "buttonOff", "buttonOn", "lightOff", "lightOn"]
+    	["switchOff", "switchOn", "presenceOff", "presenceOn", "buttonOff", "buttonOn", "lightOff", "lightOn"]
   	color:
     	description: "The hex color number for the the state, for example: #12DA0F"
 ```
