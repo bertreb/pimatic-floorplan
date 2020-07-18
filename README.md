@@ -57,6 +57,7 @@ The device object that you create must have the option to fill it with a color. 
 
 ### example
 
-\< to be added >
+< to be added >
+
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
