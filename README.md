@@ -48,8 +48,8 @@ name: <pimatic device id>_<attribute name>
 
 examples:
   switch 'my-switch', the name would be my-switch_state.
-	presence sensor 'my-sensor', the name would be my-sensor_presence
-	temperature attribute of device 'whats-the-temp', the name would be **whats-the-temp_temperature**
+  presence sensor 'my-sensor', the name would be my-sensor_presence
+  temperature attribute of device 'whats-the-temp', the name would be **whats-the-temp_temperature**
 ```
 The underscore between device id and attribute is important!
 
