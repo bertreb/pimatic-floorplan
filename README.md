@@ -19,7 +19,7 @@ The plugin adds a gui option to create 1 or more floorplan devices, for viewing 
 ## preparation
 Install the plugin the normal way via the pimatic plugins page or config.json.
 
-Create a svg image with a background of the room(s) in your home and add graphics for the devices you want to use. A free and good programm for this is (inkscape)[https://inkscape.org]. The name attribute of the devices need to match the pimatic-config (see Linking the floorplan svg and pimatic).
+Create a svg image with a background of the room(s) in your home and add graphics for the devices you want to use. A free and good programm for this is [inkscape](https://inkscape.org). The name attribute of the devices need to match the pimatic-config (see Linking the floorplan svg and pimatic).
 Save the created svg file in the public folder of pimatic-mobile-frontend. The filename (incl .svg) is use in the device config.
 
 Create a floorplan device with the following configuration:
