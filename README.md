@@ -55,7 +55,8 @@ The underscore between device id and attribute is important!
 
 The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
 
-## example
+### example
+
 < to be added >
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
