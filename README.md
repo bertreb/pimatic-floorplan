@@ -46,13 +46,13 @@ In the svg file you need to name a device object with the folowwing name (and op
 ```
 	name: <pimatic device id>_<attribute name>
 
-	examples:
-		switch 'my-switch', the name would be my-switch_state.
-		presence sensor 'my-sensor', the name would be my-sensor_presence
-		temperature attribute of device 'whats-the-temp', the name would be **whats-the-temp_temperature**
-
-	The underscore between device id and attribute is important!
+  examples:
+  switch 'my-switch', the name would be my-switch_state.
+	presence sensor 'my-sensor', the name would be my-sensor_presence
+	temperature attribute of device 'whats-the-temp', the name would be **whats-the-temp_temperature**
 ```
+The underscore between device id and attribute is important!
+
 The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
 
 ---
