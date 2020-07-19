@@ -21,7 +21,7 @@ module.exports = {
               type: "string"
             type:
               description: "The gui type of device"
-              enum: ["switch","button","presence","light","string"]
+              enum: ["switch","button","presence","light","sensor"]
             pimatic_device_id:
               descpription: "The pimatic device Id"
               type: "string"

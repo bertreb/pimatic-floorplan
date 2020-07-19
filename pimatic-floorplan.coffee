@@ -160,7 +160,7 @@ module.exports = (env) ->
                     description: "remote device " + _attrName ? ""
                     type: _deviceAttrType
                   )
-                when "string"
+                when "sensor"
                   _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                   _deviceAttrType = "string"
                   @addAttribute(_attrName,
@@ -220,7 +220,7 @@ module.exports = (env) ->
             remoteSetAction: 'buttonPressed'
           @_createGetter attrName, () => 
             return Promise.resolve @attributeValues[attrName].state.button
-        when "string"
+        when "sensor"
           @attributeValues[attrName] =
             state: 
               sensor: @lastState?[attrName]?.value ? ""
@@ -261,24 +261,23 @@ module.exports = (env) ->
         @emit _attr, null
       ,1000 )
     setLocalLight: (_attr, _type, _receivedValue) =>
-      env.logger.info "Set localLight: " + _attr + ", _type" + _type + ", _receivedValue " + _receivedValue
+      env.logger.info "Set localLight: " + _attr + ", _type" + _type + ", _receivedValue " + _receivedValue + ", @attributeValues[_attr].state.color " + @attributeValues[_attr].state.color
       switch _type
         when "color"
           _value = "#" + _receivedValue unless _receivedValue.startsWith('#')
           @attributeValues[_attr].state.color = _value
           @emit _attr, _value
-
-        when "dimlevel"
-          if _receivedValue > 0 
+        when "dimlevel"          
+          if _receivedValue > 0
             @attributeValues[_attr].state.on = true
+            @emit _attr, @attributeValues[_attr].state.color
           else
             @attributeValues[_attr].state.on = false
-
-          _newDimlevelColor = chroma(@attributeValues[_attr].state.color).luminance(_receivedValue/200).hex()
-
-          @attributeValues[_attr].state.dimlevel = _receivedValue
-          @emit _attr, _newDimlevelColor
-
+            @emit _attr, @stateColors.lightOff
+            #else
+            #  _newDimlevelColor = chroma(@attributeValues[_attr].state.color).luminance(_receivedValue/150).hex()
+            #  @attributeValues[_attr].state.dimlevel = _receivedValue
+            #  @emit _attr, _newDimlevelColor
         when "ct"
           kelvin=Math.round(1500 + (100-_receivedValue) / 100 * (15000-1500))
           _newCtColor = chroma.temperature(kelvin).hex()
@@ -301,7 +300,10 @@ module.exports = (env) ->
       @attributeValues[_attr].remoteDevice[_setter](@attributeValues[_attr].state.on)
 
       # set local light attribute to right color
+      #if @attributeValues[_attr].state.on
       @emit _attr, @attributeValues[_attr].state.color
+      #else
+      #  @emit _attr, @stateColors.lightOff
 
     buttonPressed: (_id) =>
       @attributeValues[_id]["remoteValue"] = _id

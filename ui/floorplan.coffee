@@ -85,7 +85,7 @@ $(document).on 'templateinit', (event) ->
                 $(_tId, @svgRoot).attr('style',@presenceOff)
               @_onRemoteChange _id
 
-            when 'string' 
+            when 'sensor' 
               @[_id] = ko.observable attribute.value()
               attribute.value.subscribe (newValue) =>
                 $(_tId, @svgRoot).text(newValue)

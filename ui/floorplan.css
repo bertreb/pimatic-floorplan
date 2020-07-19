@@ -194,16 +194,3 @@ ul.items .light-rgbct-device div.ui-colorpicker-spacer {
   /*background-color: skyblue;*/
 }
 
-.switch-on {
-  fill: purple; !important;
-}
-.switch-off {
-  fill: gray; !important;
-}
-
-.presence-on {
-  fill: red; !important;
-}
-.presence-off {
-  fill: green; !important;
-}
