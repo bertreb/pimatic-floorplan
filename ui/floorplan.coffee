@@ -9,19 +9,18 @@ $(document).on 'templateinit', (event) ->
       @td = templData
       @floorplan = @device.config.floorplan
 
-      @switchOff = "fill:#000000"
-      @switchOn = "fill:#00dd00"
-      @presenceOff = 'fill:#000000'
-      @presenceOn = 'fill:#dd0000'
-      @buttonOff = 'fill:#000000'
+      @switchOff = 'fill:#cccccc'
+      @switchOn = "fill:#00ff00"
+      @presenceOff = 'fill:#cccccc'
+      @presenceOn = 'fill:#ff0000'
+      @buttonOff = 'fill:#cccccc'
       @buttonOn = 'fill:#0000dd'
-      @lightOff = 'fill:#000000'
-      @lightOn = 'fill:#dddd00'
-
-
+      @lightOff = 'fill:#cccccc'
+      @lightOn = 'fill:#ffff00'
       for _stateColor in @device.config.colors
-        if @[_stateColor.name]?
-          @[_stateColor.name] = "fill:" + _stateColor.color
+        #if @[_stateColor.name]?
+        @[_stateColor.name] = "fill:" + _stateColor.color
+
 
       @floorplanDevices = {}
       for _dev, i in @device.config.devices
@@ -44,7 +43,7 @@ $(document).on 'templateinit', (event) ->
             when 'switch'
               if attribute.value()
                 $(_tId, @svgRoot).attr('style', @switchOn)
-              else            
+              else
                 $(_tId, @svgRoot).attr('style', @switchOff)
               
               $(_tId, @svgRoot).on("click", (e)=>
@@ -70,25 +69,32 @@ $(document).on 'templateinit', (event) ->
               @_onRemoteChange _id
 
             when 'light'
-              $(_tId, @svgRoot).attr('style', 'fill:'+attribute.value())
+              if ('fill:'+attribute.value()) isnt @lightOff
+                $(_tId, @svgRoot).attr('style',@lightOn)
+              else
+                $(_tId, @svgRoot).attr('style',@lightOff)
               $(_tId, @svgRoot).on("click", (e)=>
                 _tId = "#" + e.target.id
                 _clickedElement = $(_tId, @svgRoot)
-                @_setLight(e.target.id, true)
+                if _clickedElement.attr("style") == @lightOn
+                  _clickedElement.attr('style', @lightOff)
+                  @_setState(e.target.id, false)
+                else            
+                  _clickedElement.attr('style', @lightOn)
+                  @_setState(e.target.id, true)
               )
               @_onRemoteChange _id
+              @_onRemoteColorChange _id
 
             when 'presence'
               if attribute.value()
                 $(_tId, @svgRoot).attr('style',@presenceOn)
-              else            
+              else
                 $(_tId, @svgRoot).attr('style',@presenceOff)
               @_onRemoteChange _id
 
             when 'sensor' 
-              @[_id] = ko.observable attribute.value()
-              attribute.value.subscribe (newValue) =>
-                $(_tId, @svgRoot).text(newValue)
+              @_onRemoteChange _id
       )
 
 
@@ -121,7 +127,6 @@ $(document).on 'templateinit', (event) ->
 
     _onRemoteChange: (attributeString) =>
       attribute = @getAttribute(attributeString)
-
       unless attributeString?
         throw new Error("The floorplan device needs an #{attributeString} attribute!")
 
@@ -129,7 +134,7 @@ $(document).on 'templateinit', (event) ->
       attribute.value.subscribe (newValue) =>
         _tId = "#" + attributeString
         switch @floorplanDevices[attributeString].type
-          when 'switch'          
+          when 'switch'    
             if newValue
               $(_tId, @svgRoot).attr('style',@switchOn)
             else
@@ -145,8 +150,24 @@ $(document).on 'templateinit', (event) ->
             else
               $(_tId, @svgRoot).attr('style',@presenceOff)
           when 'light'
-            @lightOn = 'fill:'+newValue
-            $(_tId, @svgRoot).attr('style',@lightOn)
+            if newValue
+              $(_tId, @svgRoot).attr('style',@lightOn)
+            else
+              $(_tId, @svgRoot).attr('style',@lightOff)
+          when 'sensor'
+            $(_tId, @svgRoot).text(newValue)
+
+    _onRemoteColorChange: (attributeString) =>
+      attributeStringColor = attributeString + '_color'
+      attribute = @getAttribute(attributeStringColor)
+      unless attributeString?
+        throw new Error("The floorplan device needs an #{attributeString} attribute!")
+
+      @[attributeStringColor] = ko.observable attribute.value()
+      attribute.value.subscribe (newColor) =>
+        _tId = "#" + attributeString
+        @lightOn = 'fill:' + newColor
+        $(_tId, @svgRoot).attr('style',@lightOn)
 
     _setState: (_id, _state) ->
       @device.rest.setState {id:_id, state:_state}, global: no
