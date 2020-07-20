@@ -55,10 +55,6 @@ module.exports = (env) ->
       @id = @config.id
       #@_state = false
 
-      super()
-
-      return
-
       @floorplan = @config.floorplan
 
       checkMultipleDevices = []

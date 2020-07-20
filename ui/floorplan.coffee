@@ -40,63 +40,64 @@ $(document).on 'templateinit', (event) ->
         for i, _device of @floorplanDevices
           _id = _device.pimatic_device_id + "_" + _device.pimatic_attribute_name
           attribute = @getAttribute(_id)
-          _tId = "#" + _id
-          switch _device.type
-            when 'switch'
-              @_switchOnOff($(_tId, @svgRoot),attribute.value())
-              $(_tId, @svgRoot).on("click", (e)=>
-                _tId = "#" + e.target.id
-                _clickedElement = $(_tId, @svgRoot)
-                if _clickedElement.attr("style") == @switchOn
-                  @_switchOnOff(_clickedElement,false)
-                  @_setState(e.target.id, false)
-                else            
-                  @_switchOnOff(_clickedElement,true)
-                  @_setState(e.target.id, true)
-              )
-              @_onRemoteStateChange _id
+          if attribute?
+            _tId = "#" + _id
+            switch _device.type
+              when 'switch'
+                @_switchOnOff($(_tId, @svgRoot),attribute.value())
+                $(_tId, @svgRoot).on("click", (e)=>
+                  _tId = "#" + e.target.id
+                  _clickedElement = $(_tId, @svgRoot)
+                  if _clickedElement.attr("style") == @switchOn
+                    @_switchOnOff(_clickedElement,false)
+                    @_setState(e.target.id, false)
+                  else            
+                    @_switchOnOff(_clickedElement,true)
+                    @_setState(e.target.id, true)
+                )
+                @_onRemoteStateChange _id
 
-            when 'button'
-              @_buttonOnOff($(_tId, @svgRoot), false)
-              $(_tId, @svgRoot).on("mousedown", (e)=>
-                _tId = "#" + e.target.id
-                _clickedElement = $(_tId, @svgRoot)
-                @_buttonOnOff(_clickedElement, true)
-                @_setButton(e.target.id)
-              )
-              @_onRemoteStateChange _id
+              when 'button'
+                @_buttonOnOff($(_tId, @svgRoot), false)
+                $(_tId, @svgRoot).on("mousedown", (e)=>
+                  _tId = "#" + e.target.id
+                  _clickedElement = $(_tId, @svgRoot)
+                  @_buttonOnOff(_clickedElement, true)
+                  @_setButton(e.target.id)
+                )
+                @_onRemoteStateChange _id
 
-            when 'light'
-              attributeColor = @getAttribute(_id+"_color")
-              @lightOn = "fill:" + attributeColor.value()
-              @_lightOnOff($(_tId, @svgRoot),attribute.value())
-              #alert(@lightOn + ' - ' + attribute.value())
-              $(_tId, @svgRoot).on("click", (e)=>
-                _tId = "#" + e.target.id
-                _clickedElement = $(_tId, @svgRoot)
-                if _clickedElement.attr("style") == @lightOn
-                  @_lightOnOff(_clickedElement,false)
-                  @_setLight(e.target.id,false)
-                else            
-                  @_lightOnOff(_clickedElement,true)
-                  @_setLight(e.target.id,true)
+              when 'light'
+                attributeColor = @getAttribute(_id+"_color")
+                @lightOn = "fill:" + attributeColor.value()
+                @_lightOnOff($(_tId, @svgRoot),attribute.value())
+                #alert(@lightOn + ' - ' + attribute.value())
+                $(_tId, @svgRoot).on("click", (e)=>
+                  _tId = "#" + e.target.id
+                  _clickedElement = $(_tId, @svgRoot)
+                  if _clickedElement.attr("style") == @lightOn
+                    @_lightOnOff(_clickedElement,false)
+                    @_setLight(e.target.id,false)
+                  else            
+                    @_lightOnOff(_clickedElement,true)
+                    @_setLight(e.target.id,true)
 
-              )
-              @_onRemoteStateChange _id
-              @_onRemoteColorChange _id
+                )
+                @_onRemoteStateChange _id
+                @_onRemoteColorChange _id
 
-            when 'presence'
-              @_presenceOnOff($(_tId, @svgRoot),attribute.value())
-              @_onRemoteStateChange _id
+              when 'presence'
+                @_presenceOnOff($(_tId, @svgRoot),attribute.value())
+                @_onRemoteStateChange _id
 
-            when 'contact'
-              @_contactOnOff($(_tId, @svgRoot),attribute.value())
-              @_onRemoteStateChange _id
+              when 'contact'
+                @_contactOnOff($(_tId, @svgRoot),attribute.value())
+                @_onRemoteStateChange _id
 
-            when 'sensor' 
-              $(_tId, @svgRoot).text(attribute.value())
-              @_onRemoteStateChange _id
-      )
+              when 'sensor' 
+                $(_tId, @svgRoot).text(attribute.value())
+                @_onRemoteStateChange _id
+                 )
 
     _switchOnOff: (_id, onoff) =>
       if onoff
