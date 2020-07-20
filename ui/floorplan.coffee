@@ -28,10 +28,12 @@ $(document).on 'templateinit', (event) ->
       for _dev, i in @device.config.devices
         @floorplanDevices[_dev.pimatic_device_id+'_'+_dev.pimatic_attribute_name] = @device.config.devices[i]
 
+    getItemTemplate: => 'floorplan'
+
     afterRender: (elements) =>
       super(elements)
       ### Apply UI elements ###
-      
+
       a = document.getElementById(@id)
       a.addEventListener("load",() =>
         svgDoc = a.contentDocument #get the inner DOM of alpha.svg
@@ -51,7 +53,7 @@ $(document).on 'templateinit', (event) ->
                   if _clickedElement.attr("style") == @switchOn
                     @_switchOnOff(_clickedElement,false)
                     @_setState(e.target.id, false)
-                  else            
+                  else
                     @_switchOnOff(_clickedElement,true)
                     @_setState(e.target.id, true)
                 )
@@ -78,7 +80,7 @@ $(document).on 'templateinit', (event) ->
                   if _clickedElement.attr("style") == @lightOn
                     @_lightOnOff(_clickedElement,false)
                     @_setLight(e.target.id,false)
-                  else            
+                  else
                     @_lightOnOff(_clickedElement,true)
                     @_setLight(e.target.id,true)
 
@@ -94,7 +96,7 @@ $(document).on 'templateinit', (event) ->
                 @_contactOnOff($(_tId, @svgRoot),attribute.value())
                 @_onRemoteStateChange _id
 
-              when 'sensor' 
+              when 'sensor'
                 $(_tId, @svgRoot).text(attribute.value())
                 @_onRemoteStateChange _id
       )
@@ -128,7 +130,7 @@ $(document).on 'templateinit', (event) ->
         $(_id, @svgRoot).attr('style',@buttonOn)
         setTimeout(=>
           $(_id, @svgRoot).attr('style',@buttonOff)
-        ,1000)        
+        ,1000)
       else
         $(_id, @svgRoot).attr('style',@buttonOff)
 
@@ -142,16 +144,16 @@ $(document).on 'templateinit', (event) ->
       attribute.value.subscribe (newValue) =>
         _tId = "#" + attributeString
         switch @floorplanDevices[attributeString].type
-          when 'switch'    
-            @_switchOnOff($(_tId, @svgRoot),newValue)    
+          when 'switch'
+            @_switchOnOff($(_tId, @svgRoot),newValue)
           when 'button'
-            @_buttonOnOff($(_tId, @svgRoot), true)    
+            @_buttonOnOff($(_tId, @svgRoot), true)
           when 'presence'
-            @_presenceOnOff($(_tId, @svgRoot),newValue)    
+            @_presenceOnOff($(_tId, @svgRoot),newValue)
           when 'contact'
             @_contactOnOff($(_tId, @svgRoot),newValue)
           when 'light'
-            @_lightOnOff($(_tId, @svgRoot),newValue)   
+            @_lightOnOff($(_tId, @svgRoot),newValue)
           when 'sensor'
             $(_tId, @svgRoot).text(newValue)
 

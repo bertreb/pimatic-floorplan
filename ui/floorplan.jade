@@ -1,4 +1,4 @@
 script#floorplan-template(type='text/template')
   li.sortable.no-header.floorplan-device
-    label.device-label2(data-bind="text: name, tooltip: $data.labelTooltipHtml")
+    label.device-label(data-bind="text: name, tooltip: $data.labelTooltipHtml")
     object.floorplan(data-bind="attr:{id: id, data: floorplan}", type="image/svg+xml",position="relative")
