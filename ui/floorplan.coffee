@@ -14,7 +14,7 @@ $(document).on 'templateinit', (event) ->
       @presenceOff = 'fill:#cccccc'
       @presenceOn = 'fill:#ff0000'
       @contactOff = 'fill:#cccccc'
-      @contactOn = 'fill:#ff00ff'
+      @contactOn = 'fill:#88ffff'
       @buttonOff = 'fill:#cccccc'
       @buttonOn = 'fill:#0000dd'
       @lightOff = 'fill:#cccccc'
