@@ -18,6 +18,15 @@
     "type": "git",
     "url": "git+https://github.com/bertreb/pimatic-floorplan.git"
   },
+  "files": [
+    "pimatic-floorplan.coffee",
+    "pimatic-floorplan-config-schema.coffee",
+    "device-config-schema.coffee",
+    "README.md",
+    "LICENSE",
+    "HISTORY.md",
+    "ui"
+  ],
   "configSchema": "pimatic-floorplan-config-schema.coffee",
   "dependencies": {
     "cassert": "^0.1.2",
