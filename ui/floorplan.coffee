@@ -18,8 +18,8 @@ $(document).on 'templateinit', (event) ->
       @lightOff = 'fill:#cccccc'
       @lightOn = 'fill:#ffff00'
       for _stateColor in @device.config.colors
-        #if @[_stateColor.name]?
-        @[_stateColor.name] = "fill:" + _stateColor.color
+        if @[_stateColor.name]?
+          @[_stateColor.name] = "fill:" + _stateColor.color
 
 
       @floorplanDevices = {}
@@ -41,91 +41,82 @@ $(document).on 'templateinit', (event) ->
           _tId = "#" + _id
           switch _device.type
             when 'switch'
-              if attribute.value()
-                $(_tId, @svgRoot).attr('style', @switchOn)
-              else
-                $(_tId, @svgRoot).attr('style', @switchOff)
-              
+              @_switchOnOff($(_tId, @svgRoot),attribute.value())
               $(_tId, @svgRoot).on("click", (e)=>
                 _tId = "#" + e.target.id
                 _clickedElement = $(_tId, @svgRoot)
                 if _clickedElement.attr("style") == @switchOn
-                  _clickedElement.attr('style', @switchOff)
+                  @_switchOnOff(_clickedElement,false)
                   @_setState(e.target.id, false)
                 else            
-                  _clickedElement.attr('style', @switchOn)
+                  @_switchOnOff(_clickedElement,true)
                   @_setState(e.target.id, true)
               )
-              @_onRemoteChange _id
+              @_onRemoteStateChange _id
 
             when 'button'
-              $(_tId, @svgRoot).attr('style', @buttonOff)
+              @_buttonOn($(_tId, @svgRoot))
               $(_tId, @svgRoot).on("mousedown", (e)=>
                 _tId = "#" + e.target.id
                 _clickedElement = $(_tId, @svgRoot)
-                _clickedElement.attr('style', @buttonOn)
+                @_buttonOn(_clickedElement)
                 @_setButton(e.target.id)
               )
-              @_onRemoteChange _id
+              @_onRemoteStateChange _id
 
             when 'light'
-              if ('fill:'+attribute.value()) isnt @lightOff
-                $(_tId, @svgRoot).attr('style',@lightOn)
-              else
-                $(_tId, @svgRoot).attr('style',@lightOff)
+              #if ('fill:'+attribute.value()) is @lightOn
+              @_lightOnOff($(_tId, @svgRoot),attribute.value())
+              #else
+              #  @_lightOnOff($(_tId, @svgRoot),true)
               $(_tId, @svgRoot).on("click", (e)=>
                 _tId = "#" + e.target.id
                 _clickedElement = $(_tId, @svgRoot)
+                #alert(_clickedElement.attr("style") + ' - ' + @lightOn)
                 if _clickedElement.attr("style") == @lightOn
-                  _clickedElement.attr('style', @lightOff)
-                  @_setState(e.target.id, false)
+                  @_setLight(e.target.id,false)
+                  @_lightOnOff(_clickedElement,false)
                 else            
-                  _clickedElement.attr('style', @lightOn)
-                  @_setState(e.target.id, true)
+                  @_setLight(e.target.id,true)
+                  @_lightOnOff(_clickedElement,true)
+
               )
-              @_onRemoteChange _id
+              @_onRemoteStateChange _id
               @_onRemoteColorChange _id
 
             when 'presence'
-              if attribute.value()
-                $(_tId, @svgRoot).attr('style',@presenceOn)
-              else
-                $(_tId, @svgRoot).attr('style',@presenceOff)
-              @_onRemoteChange _id
+              @_presenceOnOff($(_tId, @svgRoot),attribute.value())
+              @_onRemoteStateChange _id
 
             when 'sensor' 
-              @_onRemoteChange _id
+              @_onRemoteStateChange _id
       )
 
+    _switchOnOff: (_id, onoff) =>
+      if onoff
+        $(_id, @svgRoot).attr('style',@switchOn)
+      else
+        $(_id, @svgRoot).attr('style',@switchOff)
 
-    _onLocalChange: (element, fn) ->
-      timeout = 500 # ms
+    _presenceOnOff: (_id, onoff) =>
+      if onoff
+        $(_id, @svgRoot).attr('style',@presenceOn)
+      else
+        $(_id, @svgRoot).attr('style',@presenceOff)
 
-      # only execute one command at the time
-      # delay the callback to protect the device against overflow
-      queue = async.queue((arg, cb) =>
-        fn.call(@, arg)
-        .done( (data) ->
-          ajaxShowToast(data)
-          setTimeout cb, timeout
-        )
-        .fail( (data) ->
-          ajaxAlertFail(data)
-          setTimeout cb, timeout
-        )
-      , 1) # concurrency
+    _lightOnOff: (_id, onoff) =>
+      if onoff
+        $(_id, @svgRoot).attr('style',@lightOn)
+      else
+        $(_id, @svgRoot).attr('style',@lightOff)
 
-      $("#"+element, @svgRoot).on("click", (e, payload) =>       
-        #return if payload?.origin is 'remote'
-        #return if @[element]?() is $(e.target).val()
-        # flush queue to do not pile up commands
-        # latest command has highest priority
-        queue.kill() if queue.length() > 2
-        queue.push $(e.target).val()
-      
-      )
+    _buttonOn: (_id) =>
+      $(_id, @svgRoot).attr('style',@buttonOn)
+      setTimeout(=>
+        $(_id, @svgRoot).attr('style',@buttonOff)
+      ,1000)
 
-    _onRemoteChange: (attributeString) =>
+    _onRemoteStateChange: (attributeString) =>
       attribute = @getAttribute(attributeString)
       unless attributeString?
         throw new Error("The floorplan device needs an #{attributeString} attribute!")
@@ -135,25 +126,13 @@ $(document).on 'templateinit', (event) ->
         _tId = "#" + attributeString
         switch @floorplanDevices[attributeString].type
           when 'switch'    
-            if newValue
-              $(_tId, @svgRoot).attr('style',@switchOn)
-            else
-              $(_tId, @svgRoot).attr('style',@switchOff)
+            @_switchOnOff($(_tId, @svgRoot),newValue)    
           when 'button'
-            $(_tId, @svgRoot).attr('style',@buttonOn)
-            setTimeout(=>
-              $(_tId, @svgRoot).attr('style',@buttonOff)
-            ,1000)
-          when 'presence'       
-            if newValue
-              $(_tId, @svgRoot).attr('style',@presenceOn)
-            else
-              $(_tId, @svgRoot).attr('style',@presenceOff)
+            @_buttonOn($(_tId, @svgRoot))    
+          when 'presence'
+            @_presenceOnOff($(_tId, @svgRoot),newValue)    
           when 'light'
-            if newValue
-              $(_tId, @svgRoot).attr('style',@lightOn)
-            else
-              $(_tId, @svgRoot).attr('style',@lightOff)
+            @_lightOnOff($(_tId, @svgRoot),newValue)   
           when 'sensor'
             $(_tId, @svgRoot).text(newValue)
 
@@ -166,8 +145,10 @@ $(document).on 'templateinit', (event) ->
       @[attributeStringColor] = ko.observable attribute.value()
       attribute.value.subscribe (newColor) =>
         _tId = "#" + attributeString
+        _oldColor = @lightOn
         @lightOn = 'fill:' + newColor
-        $(_tId, @svgRoot).attr('style',@lightOn)
+        if $(_tId, @svgRoot).attr('style') is _oldColor
+          @_lightOnOff($(_tId, @svgRoot), true)
 
     _setState: (_id, _state) ->
       @device.rest.setState {id:_id, state:_state}, global: no

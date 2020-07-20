@@ -310,7 +310,7 @@ module.exports = (env) ->
     setLight:(_attr, _lightState) =>
       _setter = @attributeValues[_attr].remoteSetAction
       # toggle remote device state
-      @attributeValues[_attr].state.on = !@attributeValues[_attr].state.on
+      @attributeValues[_attr].state.on = _lightState # !@attributeValues[_attr].state.on
       # switch remote light device on/off
       @attributeValues[_attr].remoteDevice[_setter](@attributeValues[_attr].state.on)
 
