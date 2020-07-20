@@ -12,9 +12,9 @@ This plugin adds a gui option to create 1 or more floorplan devices, for viewing
 - Scalable Vector Graphics (svg) as graphical base for a floorplan.
 - Manual adding of devices that must be shown on the floorplan.
 - Free choice of shapes for background and the pimatic devices, as long as they are linked to pimatic (see Linking the floorplan svg and pimatic).
-- The supported devices are: switch, presence, light, button and sensor (text/value display).
-- The states of an On/off switch, light, push/release button and present/absent presence sensor are all presented via colors. The colors are configurable. The light switch will color and dim, depending on the color and brightness of the devices its connected to.
-- Attribute values can be shown via the sensor field.
+- The supported devices are: switch, presence, contact, light, button and sensor (text/value display).
+- The states of an on/off switch, open/close contact, light, push/release button and present/absent presence sensor are all presented via colors. The colors are configurable. The light  will color depending on the color of the device its connected to.
+- Attribute values can be shown via the sensor field. Optional you can add the acronym and unit of the used device.
 
 ## preparation
 Install the plugin the normal way via the pimatic plugins page or config.json.
@@ -41,7 +41,7 @@ colors: "Array with Colors for the states in the floorplan device"
 ```
 Add pimatic devices by there device-id, give them a logical type and optional color the states.
 
-Make sure that floorplan devices are the last devices in the device list (gui device page).
+Make sure that floorplan devices are the last devices in the device list (the gui devices page).
 
 #### Linking the floorplan svg and pimatic
 
