@@ -65,7 +65,7 @@ module.exports = (env) ->
 
       @lightAttributes = ["state","color","ct","dimlevel"]
 
-      @framework.on "deviceChanged", (device) =>
+      @framework.on "deviceChanged", @deviceChange = (device) =>
         _floorplanDevice = _.find(@attributeValues, (d)=> d.remoteDevice.config.id is device.config.id)
         if _floorplanDevice?
           _attrName = _floorplanDevice.attrName
@@ -102,7 +102,6 @@ module.exports = (env) ->
         )
       getRemoteSensor = (_device, _attrName, _remoteAttrName) =>
         _name = _device.config.id + "." + _remoteAttrName
-        env.logger.info "_name: " + _name
         _value = @framework.variableManager.getVariableValue(_name)
         @setLocalSensor(_attrName, _value)
 
@@ -148,6 +147,13 @@ module.exports = (env) ->
                     description: "remote device " + _attrName ? ""
                     type: if _deviceAttrType is "boolean" then "boolean" else "string"
                   )
+                when "contact"
+                  _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
+                  _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                  @addAttribute(_attrName,
+                    description: "remote device " + _attrName ? ""
+                    type: if _deviceAttrType is "boolean" then "boolean" else "string"
+                  )
                 when "button"
                   _button = _.find(_fullDevice.config.buttons, (b) => _device.pimatic_attribute_name == b.id)
                   if _button?
@@ -184,7 +190,7 @@ module.exports = (env) ->
                 else
                   throw new Error "Device type '#{_device.type}' of device '#{_device.id}' not supported" 
 
-              @addDevice(_attrName, _device.type, _fullDevice, _device.pimatic_attribute_name)
+              @addDevice(_attrName, _device, _fullDevice, _device.pimatic_attribute_name)
 
             else
               env.logger.info "Pimatic device '#{_device.pimatic_device_id}' does not excist"
@@ -193,9 +199,9 @@ module.exports = (env) ->
   
       super()
 
-    addDevice: (attrName, deviceAttrType, remoteDevice, remoteAttrName) =>
+    addDevice: (attrName, device, remoteDevice, remoteAttrName) =>
       #_attr = _device.config.id
-      switch deviceAttrType
+      switch device.type
         #when "number"
         #  @attributeValues[attrName] =
         #    remoteValue: @lastState?[attrName]?.value ? 0
@@ -213,6 +219,14 @@ module.exports = (env) ->
               on: @lastState?[attrName]?.value ? false
             remoteGetAction: ['presence']
             remoteSetAction: 'changePresenceTo'
+          @_createGetter attrName, () => 
+            return Promise.resolve @attributeValues[attrName].state.on
+        when "contact"
+          @attributeValues[attrName] =
+            state: 
+              on: @lastState?[attrName]?.value ? false
+            remoteGetAction: ['contact']
+            remoteSetAction: 'changeContactTo'
           @_createGetter attrName, () => 
             return Promise.resolve @attributeValues[attrName].state.on
         when "light"
@@ -253,30 +267,43 @@ module.exports = (env) ->
           @_createGetter attrName, () => 
             return Promise.resolve @attributeValues[attrName].state.sensor
 
-      @attributeValues[attrName]["type"] = deviceAttrType
+      if device.acronym? and remoteDevice.attributes[remoteAttrName].acronym?
+        @attributeValues[attrName].state["acronym"] = remoteDevice.attributes[remoteAttrName].acronym
+      if device.unit? and remoteDevice.attributes[remoteAttrName].unit?
+        @attributeValues[attrName].state["unit"] = remoteDevice.attributes[remoteAttrName].unit
+      @attributeValues[attrName]["type"] = device.type
       @attributeValues[attrName]["attrName"] = attrName
       @attributeValues[attrName]["remoteAttrName"] = remoteAttrName
       @attributeValues[attrName]["remoteDevice"] = remoteDevice
 
+      env.logger.debug "Added device: " + JSON.stringify(@attributeValues[attrName].state,null,2)
+
 
     getTemplateName: -> "floorplan"
 
+    _totalValue: (_attr, _value) =>
+      _totalValue = @attributeValues[_attr].state.acronym ? ''
+      _totalValue += ' ' if @attributeValues[_attr].state.acronym
+      _totalValue += _value
+      _totalValue += ' ' if @attributeValues[_attr].state.unit
+      _totalValue += @attributeValues[_attr].state.unit ? ''
+      return _totalValue
+
     setLocalState: (_attr, _value) =>
-      #env.logger.info "SetLocalState _attr: " + _attr + ", value: " + _value
       if typeof _value is 'boolean'
         @attributeValues[_attr].state.on = _value
         @emit _attr, _value
       else
-        @attributeValues[_attr].state.sensor = _value
-        @emit _attr, _value        
+        _totalValue = @_totalValue(_attr, _value)
+        @attributeValues[_attr].state.sensor = @_totalValue(_attr, _value)
+        @emit _attr, _totalValue        
 
     setLocalSensor: (_attr, _value) =>
-      env.logger.info "SetLocalSensor _attr: " + _attr + ", value: " + _value
-      @attributeValues[_attr].state.sensor = _value
-      @emit _attr, _value
+      _totalValue = @_totalValue(_attr, _value)
+      @attributeValues[_attr].state.sensor = _totalValue
+      @emit _attr, _totalValue
 
     setLocalButton: (_attr, _value) =>
-      #env.logger.info "SetLocalState _attr: " + _attr + ", value: " + _value
       @attributeValues[_attr].state.button = _value
       @emit _attr, _value
       setTimeout(=>
@@ -286,7 +313,6 @@ module.exports = (env) ->
       _attrColor = _attr + '_color'
       switch _type
         when "state"
-          #_value = "#" + _receivedValue unless _receivedValue.startsWith('#')
           @attributeValues[_attr].state.on = _receivedValue
           @emit _attr, _receivedValue
         when "color"
@@ -295,11 +321,8 @@ module.exports = (env) ->
           @emit _attrColor, _value
         when "dimlevel"          
           if _receivedValue > 0
-            #@attributeValues[_attr].state.on = true
-            #@emit _attr, true
             _newDimlevelColor = chroma(@attributeValues[_attr].state.color).luminance(_receivedValue/130).hex()
             @attributeValues[_attr].state.dimlevel = _receivedValue
-            #@emit _attrColor, _newDimlevelColor
           else
             @attributeValues[_attr].state.on = false
             @emit _attr, false 
@@ -307,7 +330,6 @@ module.exports = (env) ->
           kelvin=Math.round(1500 + (100-_receivedValue) / 100 * (15000-1500))
           _newCtColor = chroma.temperature(kelvin).hex()
           @attributeValues[_attr].state.ct = _receivedValue
-          #@emit _attrColor, _newCtColor
 
       #env.logger.info "SetLocalLight _attr: " + _attr + ", _type: " + _type + ", value: " + _receivedValue + ", @attributeValues[_attr].state: " + JSON.stringify(@attributeValues[_attr].state,null,2)
 
@@ -319,10 +341,9 @@ module.exports = (env) ->
     setLight:(_attr, _lightState) =>
       _setter = @attributeValues[_attr].remoteSetAction
       # toggle remote device state
-      @attributeValues[_attr].state.on = _lightState # !@attributeValues[_attr].state.on
+      @attributeValues[_attr].state.on = _lightState
       # switch remote light device on/off
       @attributeValues[_attr].remoteDevice[_setter](@attributeValues[_attr].state.on)
-
       # set local light attribute to right color
       @emit _attr, @attributeValues[_attr].state.on
       
@@ -339,6 +360,7 @@ module.exports = (env) ->
 
     destroy: ->
       @framework.removeListener('deviceAttributeChanged', @attrHandler)
+      @framework.removeListener("deviceChanged", @deviceChange)
       super()
 
 

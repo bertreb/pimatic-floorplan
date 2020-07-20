@@ -13,6 +13,8 @@ $(document).on 'templateinit', (event) ->
       @switchOn = "fill:#00ff00"
       @presenceOff = 'fill:#cccccc'
       @presenceOn = 'fill:#ff0000'
+      @contactOff = 'fill:#cccccc'
+      @contactOn = 'fill:#ff00ff'
       @buttonOff = 'fill:#cccccc'
       @buttonOn = 'fill:#0000dd'
       @lightOff = 'fill:#cccccc'
@@ -87,6 +89,10 @@ $(document).on 'templateinit', (event) ->
               @_presenceOnOff($(_tId, @svgRoot),attribute.value())
               @_onRemoteStateChange _id
 
+            when 'contact'
+              @_contactOnOff($(_tId, @svgRoot),attribute.value())
+              @_onRemoteStateChange _id
+
             when 'sensor' 
               $(_tId, @svgRoot).text(attribute.value())
               @_onRemoteStateChange _id
@@ -103,6 +109,12 @@ $(document).on 'templateinit', (event) ->
         $(_id, @svgRoot).attr('style',@presenceOn)
       else
         $(_id, @svgRoot).attr('style',@presenceOff)
+
+    _contactOnOff: (_id, onoff) =>
+      if onoff
+        $(_id, @svgRoot).attr('style',@contactOn)
+      else
+        $(_id, @svgRoot).attr('style',@contactOff)
 
     _lightOnOff: (_id, onoff) =>
       if onoff
@@ -135,6 +147,8 @@ $(document).on 'templateinit', (event) ->
             @_buttonOnOff($(_tId, @svgRoot), true)    
           when 'presence'
             @_presenceOnOff($(_tId, @svgRoot),newValue)    
+          when 'contact'
+            @_contactOnOff($(_tId, @svgRoot),newValue)
           when 'light'
             @_lightOnOff($(_tId, @svgRoot),newValue)   
           when 'sensor'

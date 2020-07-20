@@ -21,13 +21,21 @@ module.exports = {
               type: "string"
             type:
               description: "The gui type of device"
-              enum: ["switch","button","presence","light","sensor"]
+              enum: ["switch","button","presence","contact","light","sensor"]
             pimatic_device_id:
               descpription: "The pimatic device Id"
               type: "string"
             pimatic_attribute_name:
               description: " The attribute name of the Pimatic device like state, presence or temperature"
               type: "string"
+            acronym:
+              description: "If available add acronym before sensor value "
+              type: "boolean"
+              required: false
+            unit:
+              description: "If available add unit after sensor value "
+              type: "boolean"
+              required: false
       colors:
         description: "Colors used in floorplan device"
         format: "table"
@@ -39,7 +47,7 @@ module.exports = {
           properties:
             name:
               description: "Name of device state"
-              enum: ["switchOff", "switchOn", "presenceOff", "presenceOn", "buttonOff", "buttonOn", "lightOff", "lightOn"]
+              enum: ["switchOff", "switchOn", "presenceOff", "presenceOn", "contactOn", "contactOff","buttonOff", "buttonOn", "lightOff", "lightOn"]
             color:
               description: "Default color for state on"
               type: "string"
