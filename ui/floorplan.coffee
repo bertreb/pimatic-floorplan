@@ -97,7 +97,7 @@ $(document).on 'templateinit', (event) ->
               when 'sensor' 
                 $(_tId, @svgRoot).text(attribute.value())
                 @_onRemoteStateChange _id
-                 )
+      )
 
     _switchOnOff: (_id, onoff) =>
       if onoff
