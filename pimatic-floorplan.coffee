@@ -54,6 +54,11 @@ module.exports = (env) ->
       @name = @config.name
       @id = @config.id
       #@_state = false
+
+      super()
+
+      return
+
       @floorplan = @config.floorplan
 
       checkMultipleDevices = []
@@ -121,7 +126,7 @@ module.exports = (env) ->
           if @attributes[_attr]?
             @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
 
-      
+
       for _device in @config.devices
         do(_device) =>
           if _.find(checkMultipleDevices, (d) => d.pimatic_device_id is _device.pimatic_device_id and d.pimatic_attribute_name is _device.pimatic_attribute_name)?
@@ -164,7 +169,7 @@ module.exports = (env) ->
                       type: _deviceAttrType
                     )
                   else
-                    throw new Error "Button '#{_device.pimatic_attribute_name}' of device '#{_device.id}' not found" 
+                    throw new Error "Button '#{_device.pimatic_attribute_name}' of device '#{_device.id}' not found"
                 when "light"
                   # use hex color for all light: switch on/off, dimlevel, ct and rgb
                   _attrName = _device.pimatic_device_id + '_light' # + _device.pimatic_attribute_name
@@ -188,15 +193,15 @@ module.exports = (env) ->
                     type: _deviceAttrType
                   )
                 else
-                  throw new Error "Device type '#{_device.type}' of device '#{_device.id}' not supported" 
+                  throw new Error "Device type '#{_device.type}' of device '#{_device.id}' not supported"
 
               @addDevice(_attrName, _device, _fullDevice, _device.pimatic_attribute_name)
 
             else
               env.logger.info "Pimatic device '#{_device.pimatic_device_id}' does not excist"
-              
+
       @nrOfDevices = _.size(@configDevices)
-  
+
       super()
 
     addDevice: (attrName, device, remoteDevice, remoteAttrName) =>
@@ -207,56 +212,56 @@ module.exports = (env) ->
         #    remoteValue: @lastState?[attrName]?.value ? 0
         when "switch"
           @attributeValues[attrName] =
-            state: 
+            state:
               on: @lastState?[attrName]?.value ? false
             remoteGetAction: ['state']
             remoteSetAction: 'changeStateTo'
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.on
         when "presence"
           @attributeValues[attrName] =
-            state: 
+            state:
               on: @lastState?[attrName]?.value ? false
             remoteGetAction: ['presence']
             remoteSetAction: 'changePresenceTo'
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.on
         when "contact"
           @attributeValues[attrName] =
-            state: 
+            state:
               on: @lastState?[attrName]?.value ? false
             remoteGetAction: ['contact']
             remoteSetAction: 'changeContactTo'
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.on
         when "light"
           @attributeValues[attrName] =
-            state: 
+            state:
               on: @lastState?[attrName]?.value ? false
               dimlevel: 100
               color: @lastState?[attrName+"_color"]?.value ? ''
               ct: 50
             remoteGetAction: ['state','color']
             remoteSetAction: 'changeStateTo'
-          @_createGetter attrName + '_color', () => 
+          @_createGetter attrName + '_color', () =>
             return Promise.resolve @attributeValues[attrName].state.color
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.on
         when "button"
           @attributeValues[attrName] =
-            state: 
+            state:
               button: @lastState?[attrName]?.value ? null
             remoteGetAction: ['button']
             remoteSetAction: 'buttonPressed'
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.button
         when "sensor"
           @attributeValues[attrName] =
-            state: 
+            state:
               sensor: @lastState?[attrName]?.value ? ""
             remoteGetAction: [remoteAttrName]
             remoteSetAction: null
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
         else
           @attributeValues[attrName] =
@@ -264,7 +269,7 @@ module.exports = (env) ->
               sensor: lastState?[attrName]?.value ? ""
             remoteGetAction: [remoteAttrName]
             remoteSetAction: null
-          @_createGetter attrName, () => 
+          @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
 
       if device.acronym? and remoteDevice.attributes[remoteAttrName].acronym?
@@ -296,7 +301,7 @@ module.exports = (env) ->
       else
         _totalValue = @_totalValue(_attr, _value)
         @attributeValues[_attr].state.sensor = @_totalValue(_attr, _value)
-        @emit _attr, _totalValue        
+        @emit _attr, _totalValue
 
     setLocalSensor: (_attr, _value) =>
       _totalValue = @_totalValue(_attr, _value)
@@ -319,13 +324,13 @@ module.exports = (env) ->
           _value = "#" + _receivedValue unless _receivedValue.startsWith('#')
           @attributeValues[_attr].state.color = _value
           @emit _attrColor, _value
-        when "dimlevel"          
+        when "dimlevel"
           if _receivedValue > 0
             _newDimlevelColor = chroma(@attributeValues[_attr].state.color).luminance(_receivedValue/130).hex()
             @attributeValues[_attr].state.dimlevel = _receivedValue
           else
             @attributeValues[_attr].state.on = false
-            @emit _attr, false 
+            @emit _attr, false
         when "ct"
           kelvin=Math.round(1500 + (100-_receivedValue) / 100 * (15000-1500))
           _newCtColor = chroma.temperature(kelvin).hex()
@@ -346,7 +351,7 @@ module.exports = (env) ->
       @attributeValues[_attr].remoteDevice[_setter](@attributeValues[_attr].state.on)
       # set local light attribute to right color
       @emit _attr, @attributeValues[_attr].state.on
-      
+
     buttonPressed: (_id) =>
       @attributeValues[_id]["remoteValue"] = _id
       _setter = "buttonPressed"
