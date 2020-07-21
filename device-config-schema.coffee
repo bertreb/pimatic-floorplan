@@ -26,14 +26,14 @@ module.exports = {
               descpription: "The pimatic device Id"
               type: "string"
             pimatic_attribute_name:
-              description: " The attribute name of the Pimatic device like state, presence or temperature"
+              description: "The attribute name of the Pimatic device like state, presence or temperature"
               type: "string"
             acronym:
-              description: "If available add acronym before sensor value "
+              description: "Add acronym before sensor value (if available)"
               type: "boolean"
               required: false
             unit:
-              description: "If available add unit after sensor value "
+              description: "Add unit after sensor value (if available)"
               type: "boolean"
               required: false
       colors:
