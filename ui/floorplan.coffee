@@ -61,7 +61,7 @@ $(document).on 'templateinit', (event) ->
 
               when 'button'
                 @_buttonOnOff($(_tId, @svgRoot), false)
-                $(_tId, @svgRoot).on("mousedown", (e)=>
+                $(_tId, @svgRoot).on("click", (e)=>
                   _tId = "#" + e.target.id
                   _clickedElement = $(_tId, @svgRoot)
                   @_buttonOnOff(_clickedElement, true)

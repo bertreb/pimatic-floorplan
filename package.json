@@ -25,11 +25,13 @@
     "README.md",
     "LICENSE",
     "HISTORY.md",
-    "ui"
+    "ui/floorplan.coffee",
+    "ui/floorplan.css",
+    "ui/froorplan.jade"
   ],
   "configSchema": "pimatic-floorplan-config-schema.coffee",
   "dependencies": {
-    "cassert": "^0.1.2",
+    "cassert": "^0.1.3",
     "chroma-js": "^2.1.0",
     "lodash": "^4.17.15"
   },
