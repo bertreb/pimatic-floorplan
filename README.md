@@ -46,7 +46,7 @@ Add pimatic devices by there device-id, give them a logical type and optional co
 
 Make sure that floorplan devices are the last devices in the device list (the gui devices page).
 
-#### Linking the floorplan svg and pimatic
+## Linking the floorplan svg and pimatic
 
 In the svg file you need to name a device object with the following ID (the label is not used)
 ```
