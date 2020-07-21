@@ -45,6 +45,7 @@ colors: "Array with Colors for the states in the floorplan device"
 Add pimatic devices by there device-id, give them a logical type and optional color the states.
 
 Make sure that floorplan devices are the last devices in the device list (the gui devices page).
+After adding a floorplan please refresh the gui (incl clearing the cache)
 
 ## Linking the floorplan svg and pimatic
 
