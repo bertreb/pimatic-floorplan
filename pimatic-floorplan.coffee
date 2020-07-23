@@ -268,9 +268,9 @@ module.exports = (env) ->
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
 
-      if device.acronym? and remoteDevice.attributes[remoteAttrName].acronym?
+      if device.acronym? and device.acronym and remoteDevice.attributes[remoteAttrName].acronym?
         @attributeValues[attrName].state["acronym"] = remoteDevice.attributes[remoteAttrName].acronym
-      if device.unit? and remoteDevice.attributes[remoteAttrName].unit?
+      if device.unit? and device.unit and remoteDevice.attributes[remoteAttrName].unit?
         @attributeValues[attrName].state["unit"] = remoteDevice.attributes[remoteAttrName].unit
       @attributeValues[attrName]["type"] = device.type
       @attributeValues[attrName]["attrName"] = attrName

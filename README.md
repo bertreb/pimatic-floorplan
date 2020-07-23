@@ -37,12 +37,10 @@ devices: "list of devices used in the floorplan"
   pimatic_attribute_name:" The attribute name of the Pimatic device like state, presence or temperature"
 colors: "Array with Colors for the states in the floorplan device"
   name: "Name of device state"
-    ["switchOff", "switchOn", "contactOn", "contactOff",
-    "presenceOff", "presenceOn", "buttonOff", "buttonOn",
-    "lightOff", "lightOn"]
-  color: "The hex color number for the the state, for example: #12DA0F"
+    ["switchOff","contactOff","presenceOff","buttonOff", "lightOff"]
+  color: "The hex color number for the off state, for example: #555555"
 ```
-Add pimatic devices by there device-id, give them a logical type and optional color the states.
+Add pimatic devices by there device-id, give them a logical type and optional color the off-states. The deault off color for all devices is #dddddd (light gray). The on-state colors are defined by the svg color of the object.
 
 Make sure that floorplan devices are the last devices in the device list (the gui devices page).
 After adding a floorplan please refresh the gui (incl clearing the cache)

@@ -47,9 +47,9 @@ module.exports = {
           properties:
             name:
               description: "Name of device state"
-              enum: ["switchOff", "switchOn", "presenceOff", "presenceOn", "contactOn", "contactOff","buttonOff", "buttonOn", "lightOff", "lightOn"]
+              enum: ["switchOff", "presenceOff", "contactOff","buttonOff", "lightOff"]
             color:
-              description: "Default color for state on"
+              description: "The hex color for the selected off-state"
               type: "string"
     }
   }
