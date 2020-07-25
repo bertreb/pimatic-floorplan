@@ -129,7 +129,8 @@ module.exports = (env) ->
                 #env.logger.info "_attr " + _attr + ", attrName: " + attrEvent.attributeName + ", value " + attrEvent.value
                 @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
               when "sensor"
-                @setLocalSensor(_attr, attrEvent.value)
+                if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                  @setLocalSensor(_attr, attrEvent.value)
 
 
 
