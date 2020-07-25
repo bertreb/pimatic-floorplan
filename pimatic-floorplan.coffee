@@ -63,11 +63,13 @@ module.exports = (env) ->
       @attributes = {}
       @attributeValues = {}
 
+      @colorAttributeExtension = "_color"
+
 
       @lightAttributes = ["state","color","ct","dimlevel"]
 
       @framework.on "deviceChanged", @deviceChange = (device) =>
-        _floorplanDevice = _.find(@attributeValues, (d)=> d.remoteDevice.config.id is device.config.id)
+        _floorplanDevice = @_deviceOnFloorplan(device.config.id,null) # _.find(@attributeValues, (d)=> d.remoteDevice.config.id is device.config.id)
         if _floorplanDevice?
           _attrName = _floorplanDevice.attrName
           @attributeValues[_attrName]["remoteDevice"] = device
@@ -81,6 +83,7 @@ module.exports = (env) ->
           for _action in d.remoteGetAction
             _getter = 'get' + upperCaseFirst(_action)
             if _getter?
+              env.logger.info "_getter; " + _getter
               switch d.type
                 when 'light'
                   getRemoteLight(d.remoteDevice,_getter, d.attrName, d.remoteAttrName)
@@ -108,19 +111,24 @@ module.exports = (env) ->
 
 
       @framework.on 'deviceAttributeChanged', @attrHandler = (attrEvent) =>
-        _attr = attrEvent.device.id + "_" + attrEvent.attributeName
-        if @attributes[_attr]?
-          @setLocalState(_attr, attrEvent.value)
-          #check on button
-          return
-        _attrButton = attrEvent.device.id + "_" + attrEvent.value
-        if @attributes[_attrButton]?
-          @setLocalButton(_attrButton, attrEvent.value)
-          return
-        if attrEvent.attributeName in @lightAttributes
-          _attr = attrEvent.device.id + "_light"
+        _remoteDevice = @_deviceOnFloorplan(attrEvent.device.id, attrEvent.attributeName)
+        #env.logger.info "received attr change: " + attrEvent.device.id + " - " + attrEvent.attributeName + " - " + _remoteDevice?
+        if _remoteDevice?
+          _attr = _remoteDevice.svgId
           if @attributes[_attr]?
-            @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
+            switch _remoteDevice.type
+              when "switch" or "presence"
+                @setLocalState(_attr, attrEvent.value)
+              when "button"
+                #env.logger.info "attrEvent.value " + attrEvent.value + ", " + JSON.stringify(_remoteDevice,null,2)
+                if attrEvent.value is _remoteDevice.remoteAttrName
+                  @setLocalButton(_attr, attrEvent.value)
+              when "light"
+                #env.logger.info "_attr " + _attr + ", attrName: " + attrEvent.attributeName + ", value " + attrEvent.value
+                @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
+              when "sensor"
+                @setLocalSensor(_attr, attrEvent.value)
+
 
 
       for _device in @config.devices
@@ -136,21 +144,21 @@ module.exports = (env) ->
               switch _device.type
                 when "switch"
                   _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                  _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                  _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                   @addAttribute(_attrName,
                     description: "remote device " + _attrName ? ""
                     type: if _deviceAttrType is "boolean" then "boolean" else "string"
                   )
                 when "presence"
                   _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                  _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                  _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                   @addAttribute(_attrName,
                     description: "remote device " + _attrName ? ""
                     type: if _deviceAttrType is "boolean" then "boolean" else "string"
                   )
                 when "contact"
                   _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                  _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                  _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                   @addAttribute(_attrName,
                     description: "remote device " + _attrName ? ""
                     type: if _deviceAttrType is "boolean" then "boolean" else "string"
@@ -159,7 +167,7 @@ module.exports = (env) ->
                   _button = _.find(_fullDevice.config.buttons, (b) => _device.pimatic_attribute_name == b.id)
                   if _button?
                     _deviceAttrType = "boolean"
-                    _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                    _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                     @addAttribute(_attrName,
                       description: "remote device " + _attrName ? ""
                       type: _deviceAttrType
@@ -168,14 +176,14 @@ module.exports = (env) ->
                     throw new Error "Button '#{_device.pimatic_attribute_name}' of device '#{_device.id}' not found"
                 when "light"
                   # use hex color for all light: switch on/off, dimlevel, ct and rgb
-                  _attrName = _device.pimatic_device_id + '_light' # + _device.pimatic_attribute_name
+                  _attrName = _device.svgId # + '_light' # + _device.pimatic_attribute_name
                   _deviceAttrType = "string"
                   #light switch attribute
                   @addAttribute(_attrName,
                     description: "remote device " + _attrName ? ""
                     type: "boolean"
                   )
-                  _colorAttrName = _attrName + '_color'
+                  _colorAttrName = _attrName + @colorAttributeExtension
                   # light color attribute
                   @addAttribute(_colorAttrName,
                     description: "remote device color " + _colorAttrName ? ""
@@ -235,11 +243,11 @@ module.exports = (env) ->
             state:
               on: @lastState?[attrName]?.value ? false
               dimlevel: 100
-              color: @lastState?[attrName+"_color"]?.value ? ''
+              color: @lastState?[attrName+@colorAttributeExtension]?.value ? ''
               ct: 50
             remoteGetAction: ['state','color']
             remoteSetAction: 'changeStateTo'
-          @_createGetter attrName + '_color', () =>
+          @_createGetter attrName+"_color", () =>
             return Promise.resolve @attributeValues[attrName].state.color
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.on
@@ -273,14 +281,23 @@ module.exports = (env) ->
       if device.unit? and device.unit and remoteDevice.attributes[remoteAttrName].unit?
         @attributeValues[attrName].state["unit"] = remoteDevice.attributes[remoteAttrName].unit
       @attributeValues[attrName]["type"] = device.type
+      @attributeValues[attrName]["svgId"] = device.svgId
       @attributeValues[attrName]["attrName"] = attrName
+      @attributeValues[attrName]["remoteDeviceId"] = device.pimatic_device_id
       @attributeValues[attrName]["remoteAttrName"] = remoteAttrName
       @attributeValues[attrName]["remoteDevice"] = remoteDevice
 
-      env.logger.debug "Added device: " + JSON.stringify(@attributeValues[attrName].state,null,2)
+      #env.logger.debug "Added device: " + @attributeValues[attrName].svgId + ' - ' + @attributeValues[attrName].remoteDeviceId
 
 
     getTemplateName: -> "floorplan"
+
+    _deviceOnFloorplan: (_deviceId) =>
+      _device = _.find(@config.devices,(d)=> d.pimatic_device_id is _deviceId)
+      if _device?
+        return @attributeValues[_device.svgId]
+      else
+        return null
 
     _totalValue: (_attr, _value) =>
       _totalValue = @attributeValues[_attr].state.acronym ? ''
@@ -311,13 +328,13 @@ module.exports = (env) ->
         @emit _attr, null
       ,1000 )
     setLocalLight: (_attr, _type, _receivedValue) =>
-      _attrColor = _attr + '_color'
+      _attrColor = _attr + @colorAttributeExtension
       switch _type
         when "state"
           @attributeValues[_attr].state.on = _receivedValue
           @emit _attr, _receivedValue
         when "color"
-          _value = "#" + _receivedValue unless _receivedValue.startsWith('#')
+          _value = "#" + _receivedValue unless String(_receivedValue).startsWith('#')
           @attributeValues[_attr].state.color = _value
           @emit _attrColor, _value
         when "dimlevel"

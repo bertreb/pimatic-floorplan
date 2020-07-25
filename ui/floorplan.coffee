@@ -9,6 +9,8 @@ $(document).on 'templateinit', (event) ->
       @td = templData
       @floorplan = @device.config.floorplan
 
+      @colorAttributeExtension = "_color"
+
       @switchOff = 'fill:#dddddd'
       #@switchOn = "fill:#00ff00"
       @presenceOff = 'fill:#dddddd'
@@ -25,7 +27,10 @@ $(document).on 'templateinit', (event) ->
 
       @floorplanDevices = {}
       for _dev, i in @device.config.devices
-        @floorplanDevices[_dev.pimatic_device_id+'_'+_dev.pimatic_attribute_name] = @device.config.devices[i]
+        #alert(JSON.stringify(_dev,null,2))
+
+        @floorplanDevices[_dev.svgId] = @device.config.devices[i]
+        #@floorplanDevices[_dev.pimatic_device_id+'_'+_dev.pimatic_attribute_name] = @device.config.devices[i]
 
     getItemTemplate: => 'floorplan'
 
@@ -39,13 +44,15 @@ $(document).on 'templateinit', (event) ->
         @svgRoot = svgDoc.documentElement
 
         for i, _device of @floorplanDevices
-          _id = _device.pimatic_device_id + "_" + _device.pimatic_attribute_name
+          #_id = _device.pimatic_device_id + "_" + _device.pimatic_attribute_name
+          _id = _device.svgId
           attribute = @getAttribute(_id)
           if attribute?
             _tId = "#" + _id
             _selector = $(_tId, @svgRoot)
             # save the designed 'on' color
             _onColor = _selector.attr("style")
+            #alert(JSON.stringify(_id + ' - ' + @floorplanDevices[_id]))
             @floorplanDevices[_id]["colorOn"] = _onColor
             switch _device.type
               when 'switch'
@@ -73,9 +80,10 @@ $(document).on 'templateinit', (event) ->
                 @_onRemoteStateChange _id
 
               when 'light'
-                attributeColor = @getAttribute(_id+"_color")
-                @lightOn = "fill:" + attributeColor.value()
-                @_lightOnOff(_id,attribute.value())
+                attributeColor = @getAttribute(_id+@colorAttributeExtension)
+                attributeState = @getAttribute(_id)
+                @floorplanDevices[_id]["colorOn"] = "fill:" + attributeColor.value()
+                @_lightOnOff(_id,attributeState.value())
                 #alert(@lightOn + ' - ' + attribute.value())
                 _selector.on("click", (e)=>
                   _tId = "#" + e.target.id
@@ -156,7 +164,6 @@ $(document).on 'templateinit', (event) ->
     _buttonOnOff: (_id, onoff) =>
       _tId = "#" + _id
       if onoff
-        #alert(_onColor)
         _onColor = @floorplanDevices[_id]["colorOn"]
         $(_tId, @svgRoot).clearQueue()
         $(_tId, @svgRoot).attr('style',_onColor)
@@ -210,7 +217,7 @@ $(document).on 'templateinit', (event) ->
 
 
     _onRemoteColorChange: (attributeString) =>
-      attributeStringColor = attributeString + '_color'
+      attributeStringColor = attributeString + @colorAttributeExtension
       attribute = @getAttribute(attributeStringColor)
       unless attributeString?
         throw new Error("The floorplan device needs an #{attributeString} attribute!")

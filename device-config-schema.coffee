@@ -12,15 +12,18 @@ module.exports = {
         format: "table"
         type: "array"
         default: []
-        required: ["name", "pimatic_device_id"]
+        required: ["name", "type", "pimatic_device_id"]
         items:
           type: "object"
           properties:
             name:
-              description: "The device name"
+              description: "Name of pimatic divice on the floorplan"
+              type: "string"
+            svgId:
+              description: "The svg ID of the pimatic device"
               type: "string"
             type:
-              description: "The gui type of device"
+              description: "The gui type of the pimatic device"
               enum: ["switch","button","presence","contact","light","sensor"]
             pimatic_device_id:
               descpription: "The pimatic device Id"

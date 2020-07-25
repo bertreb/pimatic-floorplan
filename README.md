@@ -31,6 +31,7 @@ Create a floorplan device with the following configuration:
 floorplan: "the sgv filename of the floorplan"
 devices: "list of devices used in the floorplan"
   name: "The device name"
+  svgId: "The object ID used in the svg floorplan"
   type: "The gui type of device
      ["switch","button","presence","contact","light","sensor"]
   pimatic_device_id: "The pimatic device Id"
@@ -40,26 +41,18 @@ colors: "Array with Colors for the states in the floorplan device"
     ["switchOff","contactOff","presenceOff","buttonOff", "lightOff"]
   color: "The hex color number for the off state, for example: #555555"
 ```
-Add pimatic devices by there device-id, give them a logical type and optional color the off-states. The deault off color for all devices is #dddddd (light gray). The on-state colors are defined by the svg color of the object.
+Add pimatic devices by there device-id, give them a logical type and optional color the off-states. The default off color for all devices is #dddddd (light gray). The on-state colors are defined by the svg color of the object.
 
 Make sure that floorplan devices are the last devices in the device list (the gui devices page).
 After adding a floorplan please refresh the gui (incl clearing the cache)
 
 ## Linking the floorplan svg and pimatic
 
-In the svg file you need to name a device object with the following ID (the label is not used)
-```
-name: <pimatic device id>_<attribute name>
-
-examples:
-  switch 'my-switch', the ID is my-switch_state.
-  presence sensor 'my-sensor', the ID is my-sensor_presence
-  temperature attribute of device 'whats-the-temp', the ID is whats-the-temp_temperature
-```
-The underscore between device id and attribute is important! Underscores in the devicename are no problem.
+The linking between the svg objects and the pimatic devices devices is donde in the floorplan config.
+The svgId in the floorplan config must be the object ID in the floorplan svg. The svg ID can be be freely choosen.
 
 The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
-The color, font size, etc of a text field (sensor values) must be set in the editor.
+The color, font size, etc of a text field (sensor values) must be set in the svg editor.
 
 
 
