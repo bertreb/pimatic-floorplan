@@ -48,7 +48,7 @@ After adding a floorplan please refresh the gui (incl clearing the cache)
 
 ## Linking the floorplan svg and pimatic
 
-The linking between the svg objects and the pimatic devices devices is donde in the floorplan config.
+The linking between the svg objects and the pimatic devices devices is done in the floorplan config.
 The svgId in the floorplan config must be the object ID in the floorplan svg. The svg ID can be be freely choosen.
 
 The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
