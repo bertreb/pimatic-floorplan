@@ -117,7 +117,9 @@ module.exports = (env) ->
           _attr = _remoteDevice.svgId
           if @attributes[_attr]?
             switch _remoteDevice.type
-              when "switch" or "presence"
+              when "switch"
+                @setLocalState(_attr, attrEvent.value)
+              when "presence"
                 @setLocalState(_attr, attrEvent.value)
               when "button"
                 #env.logger.info "attrEvent.value " + attrEvent.value + ", " + JSON.stringify(_remoteDevice,null,2)
@@ -308,6 +310,7 @@ module.exports = (env) ->
       return _totalValue
 
     setLocalState: (_attr, _value) =>
+      env.logger.info "Attr: " + _attr + ", value: " + _value
       if typeof _value is 'boolean'
         @attributeValues[_attr].state.on = _value
         @emit _attr, _value
