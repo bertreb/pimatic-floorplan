@@ -2,9 +2,8 @@ module.exports = (env) ->
 
   Promise = env.require 'bluebird'
 
-  t = env.require('decl-api').types
   _ = env.require('lodash')
-  M = env.matcher
+  #M = env.matcher
   chroma = require 'chroma-js'
 
   class FloorplanPlugin extends env.plugins.Plugin
@@ -48,7 +47,7 @@ module.exports = (env) ->
         description: "Press a button"
         params:
           buttonId:
-            type: t.string
+            type: "string"
 
     constructor: (@config, @lastState, @framework) ->
       @name = @config.name
@@ -69,9 +68,9 @@ module.exports = (env) ->
       @lightAttributes = ["state","color","ct","dimlevel"]
 
       @framework.on "deviceChanged", @deviceChange = (device) =>
-        _floorplanDevice = @_deviceOnFloorplan(device.config.id,null) # _.find(@attributeValues, (d)=> d.remoteDevice.config.id is device.config.id)
+        _floorplanDevice = @_deviceOnFloorplan(device.config.id) # _.find(@attributeValues, (d)=> d.remoteDevice.config.id is device.config.id)
         if _floorplanDevice?
-          _attrName = _floorplanDevice.attrName
+          _attrName = _floorplanDevice.svgId
           @attributeValues[_attrName]["remoteDevice"] = device
 
 
@@ -83,7 +82,7 @@ module.exports = (env) ->
           for _action in d.remoteGetAction
             _getter = 'get' + upperCaseFirst(_action)
             if _getter?
-              env.logger.info "_getter; " + _getter
+              #env.logger.info "_getter; " + _getter
               switch d.type
                 when 'light'
                   getRemoteLight(d.remoteDevice,_getter, d.attrName, d.remoteAttrName)
@@ -111,16 +110,18 @@ module.exports = (env) ->
 
 
       @framework.on 'deviceAttributeChanged', @attrHandler = (attrEvent) =>
-        _remoteDevice = @_deviceOnFloorplan(attrEvent.device.id, attrEvent.attributeName)
+        _remoteDevice = @_deviceOnFloorplan(attrEvent.device.id)
         #env.logger.info "received attr change: " + attrEvent.device.id + " - " + attrEvent.attributeName + " - " + _remoteDevice?
         if _remoteDevice?
           _attr = _remoteDevice.svgId
           if @attributes[_attr]?
             switch _remoteDevice.type
               when "switch"
-                @setLocalState(_attr, attrEvent.value)
+                if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                  @setLocalState(_attr, attrEvent.value)
               when "presence"
-                @setLocalState(_attr, attrEvent.value)
+                if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                  @setLocalState(_attr, attrEvent.value)
               when "button"
                 #env.logger.info "attrEvent.value " + attrEvent.value + ", " + JSON.stringify(_remoteDevice,null,2)
                 if attrEvent.value is _remoteDevice.remoteAttrName
@@ -311,7 +312,6 @@ module.exports = (env) ->
       return _totalValue
 
     setLocalState: (_attr, _value) =>
-      env.logger.info "Attr: " + _attr + ", value: " + _value
       if typeof _value is 'boolean'
         @attributeValues[_attr].state.on = _value
         @emit _attr, _value

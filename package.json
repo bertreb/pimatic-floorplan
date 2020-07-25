@@ -13,7 +13,7 @@
     "gui",
     "floorplan"
   ],
-  "version": "0.2.2",
+  "version": "0.2.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bertreb/pimatic-floorplan.git"
@@ -31,8 +31,6 @@
   ],
   "configSchema": "pimatic-floorplan-config-schema.coffee",
   "dependencies": {
-    "canvas-gauges": "^2.1.7",
-    "cassert": "^0.1.2",
     "chroma-js": "^2.1.0",
     "lodash": "^4.17.15"
   },
