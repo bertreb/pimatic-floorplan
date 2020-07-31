@@ -153,6 +153,10 @@ $(document).on 'templateinit', (event) ->
                 if $(_tBar, @svgRoot)?
                   _isNumber = not Number.isNaN(attribute.value())
                   if _isNumber
+                    @_createBar(_id)
+                    @_setBar(_id, attribute.value())
+                    @_onRemoteStateChange _id
+                    ###
                     @floorplanDevices[_id]["height"] = Number $(_tBar, @svgRoot).attr('height')
                     @floorplanDevices[_id]["y"] = Number $(_tBar, @svgRoot).attr('y')
                     @_setBar(_id, attribute.value()) #attribute.value())
@@ -162,6 +166,7 @@ $(document).on 'templateinit', (event) ->
                       @_createLabel(_bar, 0, 0.2)
                       @_setBar(_id, Number attribute.value())
                       @_onRemoteStateChange _id
+                    ###
       )
 
     _createLabel: (_id, _x, _y) =>
@@ -169,8 +174,9 @@ $(document).on 'templateinit', (event) ->
       _text = @floorplanDevices[_id]['label']
       _text.setAttribute('x', _xy.x)
       _text.setAttribute('y', _xy.y)
+      _text.setAttribute('class','floorplan-text')
       _text.style.fill = 'red'
-      _text.style.fontFamily = 'Verdana'
+      _text.style.fontFamily = 'sans-serif'
       _text.style.fontSize = '3'
       @svgRoot.appendChild(_text)
 
@@ -228,41 +234,48 @@ $(document).on 'templateinit', (event) ->
 
 
     _createBar: (_id) =>     
-      _xy = @_dom2Svg(_id, 0.5, 0)
-      _x = _xy.x
-      _y = _xy.y
+      _xy = @_dom2Svg(_id, 0, 0)
+      _x = Number _xy.x
+      _y = Number _xy.y
+      _width = Number _xy.width
+      _height = Number _xy.height
+      _w = Math.round(_width)
+      _h = Math.round(_height)
 
-      _line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-      _line.setAttribute('x1',_x)
-      _line.setAttribute('y1',_y)
-      _line.setAttribute('x2',_x)
-      _line.setAttribute('y2',_y)
-      _line.setAttribute('stroke',"red")
-      @floorplanDevices[_id]["gauge"] = _line
-      _dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      _dot.setAttribute('r',5)
-      _dot.setAttribute('fill',"black")
-      _dot.setAttribute('cx',_x)
-      _dot.setAttribute('cy',_y)
+      _rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      _rect.setAttribute('x',_x)
+      _rect.setAttribute('y',_y+_height)
+      _rect.setAttribute('width',_w)
+      _rect.setAttribute('height',0)
+      _fill = @floorplanDevices[_id].format?.fill ? 'red'
+      _rect.setAttribute('fill',_fill)
+      @floorplanDevices[_id]["bar"] = _rect
    
-      _txtMin = @_createText(_id, -0.1, 0)
+      _txtMin = @_createText(_id, -0.6, 0)
       _min = @floorplanDevices[_id].format?.min ? null
       _txtMin.innerHTML = _min if _min?
 
-      _txtMax = @_createText(_id, 1.02, 0)
+      _txtMax = @_createText(_id, -0.6, -1)
       _max = @floorplanDevices[_id].format?.max ? null
       _txtMax.innerHTML = _max if _max?
 
-      _txtMid = @_createText(_id, 0.45, -1)
+      _txtMid = @_createText(_id, -0.6, -0.5)
       _maxM = Number _max ? 100
       _minM = Number _min ? 0
       _txtMid.innerHTML = Math.round ((_minM + _maxM) / 2)
 
+      _valueLabel = @_createText(_id, 0.1, 0.1, "black")
+      _valueLabel.innerHTML = "20"
+      #alert(_valueLabel)
+      @floorplanDevices[_id]["height"] = _xy.height
+      @floorplanDevices[_id]["width"] = _xy.width
+      @floorplanDevices[_id]["label"] = _valueLabel
+
+      @svgRoot.appendChild(_rect)
+      @svgRoot.appendChild(_valueLabel)
       @svgRoot.appendChild(_txtMin)
       @svgRoot.appendChild(_txtMid)
       @svgRoot.appendChild(_txtMax)
-      @svgRoot.appendChild(_line)
-      @svgRoot.appendChild(_dot)
 
 
     _createGauge: (_id) =>     
@@ -290,11 +303,12 @@ $(document).on 'templateinit', (event) ->
       _line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
       _line.setAttribute('x1',_x)
       _line.setAttribute('y1',_y)
-      _line.setAttribute('x2',_x)
+      _line.setAttribute('x2',_x+_width)
       _line.setAttribute('y2',_y)
       _line.setAttribute('stroke',"red")
       @floorplanDevices[_id]["gauge"] = _line
       @floorplanDevices[_id]["radius"] = _height
+      @floorplanDevices[_id]["onColor"] = @svgRoot.getElementById(_id).getAttribute("fill")
       _dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
       _dot.setAttribute('r',5)
       _dot.setAttribute('fill',"black")
@@ -336,9 +350,36 @@ $(document).on 'templateinit', (event) ->
       _txtLbl.setAttribute('y',_xy.y)
       _txtColor = if _color? then _color else "black"
       _txtLbl.style.fill = _txtColor
-      _txtLbl.style.fontFamily = 'Verdana'
+      _txtLbl.style.fontFamily = 'sans-serif'
       _txtLbl.style.fontSize = '3'
       return _txtLbl
+
+    _setBar: (_id, value) =>
+      _isNumber = not Number.isNaN(value)
+      _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
+      _min = _format.min ? 0
+      _max = _format.max ? 100
+      _valFactor = (value-_min)/(_max-_min)
+      _height = @floorplanDevices[_id].height
+      _xy = @_dom2Svg(_id, 0, 0)
+      _newY = _xy.y - _height * _valFactor
+      _rect = @floorplanDevices[_id]["bar"]
+      _rect.setAttribute('y',_newY)
+      _rect.setAttribute('height',Math.round(_height * _valFactor))
+
+      ###
+      if _isNumber?
+        _tBar = '#' + _id # + "_bar"
+        _height = @floorplanDevices[_id]["height"] # Number($(_tId, @svgRoot).attr('height'))
+        _y = @floorplanDevices[_id]["y"] # Number($(_tId, @svgRoot).attr('y'))
+        _y0 = _y + _height
+        _newY = _y0 - _height * value/100
+        _newHeight = _height * value/100
+        $(_tBar, @svgRoot).attr('y', _newY)
+        $(_tBar, @svgRoot).attr('height', _newHeight)
+      ###
+
+      @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
 
     _setGauge: (_id, value) =>
       # value 0=180 -> 40=360
@@ -443,19 +484,6 @@ $(document).on 'templateinit', (event) ->
             t = "Sensor_gauge empty"
             @_setGauge(_id, Number newValue)
 
-
-    _setBar: (_id, value) =>
-      _isNumber = not Number.isNaN(value)
-      if _isNumber?
-        _tBar = '#' + _id # + "_bar"
-        _height = @floorplanDevices[_id]["height"] # Number($(_tId, @svgRoot).attr('height'))
-        _y = @floorplanDevices[_id]["y"] # Number($(_tId, @svgRoot).attr('y'))
-        _y0 = _y + _height
-        _newY = _y0 - _height * value/100
-        _newHeight = _height * value/100
-        $(_tBar, @svgRoot).attr('y', _newY)
-        $(_tBar, @svgRoot).attr('height', _newHeight)
-      @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
 
 
     _onRemoteColorChange: (attributeString) =>

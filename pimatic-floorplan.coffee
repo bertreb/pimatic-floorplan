@@ -114,123 +114,126 @@ module.exports = (env) ->
 
 
       @framework.on 'deviceAttributeChanged', @attrHandler = (attrEvent) =>
-        _remoteDevice = @_deviceOnFloorplan(attrEvent.device.id)
-        #env.logger.info "received attr change: " + attrEvent.device.id + " - " + attrEvent.attributeName + " - " + _remoteDevice?
-        if _remoteDevice?
-          _attr = _remoteDevice.svgId
-          if @attributes[_attr]?
-            switch _remoteDevice.type
-              when "switch"
-                if attrEvent.attributeName is _remoteDevice.remoteAttrName
-                  @setLocalState(_attr, attrEvent.value)
-              when "presence"
-                if attrEvent.attributeName is _remoteDevice.remoteAttrName
-                  @setLocalState(_attr, attrEvent.value)
-              when "button"
-                #env.logger.info "attrEvent.value " + attrEvent.value + ", " + JSON.stringify(_remoteDevice,null,2)
-                if attrEvent.value is _remoteDevice.remoteAttrName
-                  @setLocalButton(_attr, attrEvent.value)
-              when "light"
-                #env.logger.info "_attr " + _attr + ", attrName: " + attrEvent.attributeName + ", value " + attrEvent.value
-                @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
-              when "sensor"
-                if attrEvent.attributeName is _remoteDevice.remoteAttrName
-                  @setLocalSensor(_attr, attrEvent.value)
-              when "sensor_bar"
-                if attrEvent.attributeName is _remoteDevice.remoteAttrName
-                  @setLocalSensor(_attr, attrEvent.value)
-              when "sensor_gauge"
-                if attrEvent.attributeName is _remoteDevice.remoteAttrName
-                  @setLocalVideo(_attr, attrEvent.value)
+
+        _usedDevices = _.filter(@config.devices, (d)-> d.pimatic_device_id is attrEvent.device.id)
+        for _usedDevice in _usedDevices
+          _remoteDevice = @attributeValues[_usedDevice.svgId] #attrEvent.device.id)
+          #env.logger.info "received attr change: " + attrEvent.device.id + " - " + attrEvent.attributeName + " - " + _remoteDevice?
+          if _remoteDevice?
+            _attr = _remoteDevice.svgId
+            if @attributes[_attr]?
+              switch _remoteDevice.type
+                when "switch"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalState(_attr, attrEvent.value)
+                when "presence"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalState(_attr, attrEvent.value)
+                when "button"
+                  #env.logger.info "attrEvent.value " + attrEvent.value + ", " + JSON.stringify(_remoteDevice,null,2)
+                  if attrEvent.value is _remoteDevice.remoteAttrName
+                    @setLocalButton(_attr, attrEvent.value)
+                when "light"
+                  #env.logger.info "_attr " + _attr + ", attrName: " + attrEvent.attributeName + ", value " + attrEvent.value
+                  @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
+                when "sensor"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalSensor(_attr, attrEvent.value)
+                when "sensor_bar"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalSensor(_attr, attrEvent.value)
+                when "sensor_gauge"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalSensor(_attr, attrEvent.value)
 
 
 
       for _device in @config.devices
         do(_device) =>
-          if _.find(checkMultipleDevices, (d) => d.pimatic_device_id is _device.pimatic_device_id and d.pimatic_attribute_name is _device.pimatic_attribute_name)?
-            throw new Error "Pimatic device '#{_device.pimatic_device_id}' is already used"
-          else
-            checkMultipleDevices.push _device
-            _fullDevice = @framework.deviceManager.getDeviceById(_device.pimatic_device_id)
-            if _fullDevice?
-              if _fullDevice.config.class is @config.class
-                throw new Error "You can't add floorplan devices"
-              switch _device.type
-                when "switch"
-                  _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
+          #if _.find(checkMultipleDevices, (d) => d.pimatic_device_id is _device.pimatic_device_id and d.pimatic_attribute_name is _device.pimatic_attribute_name)?
+          #  throw new Error "Pimatic device '#{_device.pimatic_device_id}' is already used"
+          #else
+          checkMultipleDevices.push _device
+          _fullDevice = @framework.deviceManager.getDeviceById(_device.pimatic_device_id)
+          if _fullDevice?
+            if _fullDevice.config.class is @config.class
+              throw new Error "You can't add floorplan devices"
+            switch _device.type
+              when "switch"
+                _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
+                _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: if _deviceAttrType is "boolean" then "boolean" else "string"
+                )
+              when "presence"
+                _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
+                _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: if _deviceAttrType is "boolean" then "boolean" else "string"
+                )
+              when "contact"
+                _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
+                _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: if _deviceAttrType is "boolean" then "boolean" else "string"
+                )
+              when "button"
+                _button = _.find(_fullDevice.config.buttons, (b) => _device.pimatic_attribute_name == b.id)
+                if _button?
+                  _deviceAttrType = "boolean"
                   _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
-                  @addAttribute(_attrName,
-                    description: "remote device " + _attrName ? ""
-                    type: if _deviceAttrType is "boolean" then "boolean" else "string"
-                  )
-                when "presence"
-                  _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                  _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
-                  @addAttribute(_attrName,
-                    description: "remote device " + _attrName ? ""
-                    type: if _deviceAttrType is "boolean" then "boolean" else "string"
-                  )
-                when "contact"
-                  _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                  _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
-                  @addAttribute(_attrName,
-                    description: "remote device " + _attrName ? ""
-                    type: if _deviceAttrType is "boolean" then "boolean" else "string"
-                  )
-                when "button"
-                  _button = _.find(_fullDevice.config.buttons, (b) => _device.pimatic_attribute_name == b.id)
-                  if _button?
-                    _deviceAttrType = "boolean"
-                    _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
-                    @addAttribute(_attrName,
-                      description: "remote device " + _attrName ? ""
-                      type: _deviceAttrType
-                    )
-                  else
-                    throw new Error "Button '#{_device.pimatic_attribute_name}' of device '#{_device.id}' not found"
-                when "light"
-                  # use hex color for all light: switch on/off, dimlevel, ct and rgb
-                  _attrName = _device.svgId # + '_light' # + _device.pimatic_attribute_name
-                  _deviceAttrType = "string"
-                  #light switch attribute
-                  @addAttribute(_attrName,
-                    description: "remote device " + _attrName ? ""
-                    type: "boolean"
-                  )
-                  _colorAttrName = _attrName + @colorAttributeExtension
-                  # light color attribute
-                  @addAttribute(_colorAttrName,
-                    description: "remote device color " + _colorAttrName ? ""
-                    type: "string" #_deviceAttrType
-                  )
-                when "sensor"
-                  _attrName = _device.svgId
-                  _deviceAttrType = "string"
-                  @addAttribute(_attrName,
-                    description: "remote device " + _attrName ? ""
-                    type: _deviceAttrType
-                  )
-                when "sensor_bar"
-                  _attrName = _device.svgId
-                  _deviceAttrType = "string"
-                  @addAttribute(_attrName,
-                    description: "remote device " + _attrName ? ""
-                    type: _deviceAttrType
-                  )
-                when "sensor_gauge"
-                  _attrName = _device.svgId
-                  _deviceAttrType = "string"
                   @addAttribute(_attrName,
                     description: "remote device " + _attrName ? ""
                     type: _deviceAttrType
                   )
                 else
-                  throw new Error "Device type '#{_device.type}' of device '#{_device.id}' not supported"
+                  throw new Error "Button '#{_device.pimatic_attribute_name}' of device '#{_device.id}' not found"
+              when "light"
+                # use hex color for all light: switch on/off, dimlevel, ct and rgb
+                _attrName = _device.svgId # + '_light' # + _device.pimatic_attribute_name
+                _deviceAttrType = "string"
+                #light switch attribute
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: "boolean"
+                )
+                _colorAttrName = _attrName + @colorAttributeExtension
+                # light color attribute
+                @addAttribute(_colorAttrName,
+                  description: "remote device color " + _colorAttrName ? ""
+                  type: "string" #_deviceAttrType
+                )
+              when "sensor"
+                _attrName = _device.svgId
+                _deviceAttrType = "string"
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: _deviceAttrType
+                )
+              when "sensor_bar"
+                _attrName = _device.svgId
+                _deviceAttrType = "string"
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: _deviceAttrType
+                )
+              when "sensor_gauge"
+                _attrName = _device.svgId
+                _deviceAttrType = "string"
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: _deviceAttrType
+                )
+              else
+                throw new Error "Device type '#{_device.type}' of device '#{_device.id}' not supported"
 
-              @addDevice(_attrName, _device, _fullDevice, _device.pimatic_attribute_name)
+            @addDevice(_attrName, _device, _fullDevice, _device.pimatic_attribute_name)
 
-            else
-              env.logger.info "Pimatic device '#{_device.pimatic_device_id}' does not excist"
+          else
+            env.logger.info "Pimatic device '#{_device.pimatic_device_id}' does not excist"
 
       @nrOfDevices = _.size(@configDevices)
 
