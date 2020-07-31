@@ -24,7 +24,7 @@ module.exports = {
               type: "string"
             type:
               description: "The gui type of the pimatic device"
-              enum: ["switch","button","presence","contact","light","sensor"]
+              enum: ["switch","button","presence","contact","light","sensor","sensor_bar","sensor_gauge"]
             pimatic_device_id:
               descpription: "The pimatic device Id"
               type: "string"
@@ -33,12 +33,15 @@ module.exports = {
               type: "string"
             acronym:
               description: "Add acronym before sensor value (if available)"
-              type: "boolean"
+              type: "string"
               required: false
             unit:
               description: "Add unit after sensor value (if available)"
-              type: "boolean"
+              type: "string"
               required: false
+            format:
+              description: "Json string with extra formatting of devices like min and max value for gauge or bar"
+              type: "string"
       colors:
         description: "Colors used in floorplan device"
         format: "table"

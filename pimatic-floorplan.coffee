@@ -88,6 +88,10 @@ module.exports = (env) ->
                   getRemoteLight(d.remoteDevice,_getter, d.attrName, d.remoteAttrName)
                 when 'sensor'
                   getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
+                when 'sensor_bar'
+                  getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
+                when 'sensor_gauge'
+                  getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
                 else
                   getRemote(d.remoteDevice,_getter, d.attrName,_action)
         )
@@ -132,6 +136,12 @@ module.exports = (env) ->
               when "sensor"
                 if attrEvent.attributeName is _remoteDevice.remoteAttrName
                   @setLocalSensor(_attr, attrEvent.value)
+              when "sensor_bar"
+                if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                  @setLocalSensor(_attr, attrEvent.value)
+              when "sensor_gauge"
+                if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                  @setLocalVideo(_attr, attrEvent.value)
 
 
 
@@ -194,7 +204,21 @@ module.exports = (env) ->
                     type: "string" #_deviceAttrType
                   )
                 when "sensor"
-                  _attrName = _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
+                  _attrName = _device.svgId
+                  _deviceAttrType = "string"
+                  @addAttribute(_attrName,
+                    description: "remote device " + _attrName ? ""
+                    type: _deviceAttrType
+                  )
+                when "sensor_bar"
+                  _attrName = _device.svgId
+                  _deviceAttrType = "string"
+                  @addAttribute(_attrName,
+                    description: "remote device " + _attrName ? ""
+                    type: _deviceAttrType
+                  )
+                when "sensor_gauge"
+                  _attrName = _device.svgId
                   _deviceAttrType = "string"
                   @addAttribute(_attrName,
                     description: "remote device " + _attrName ? ""
@@ -271,6 +295,22 @@ module.exports = (env) ->
             remoteSetAction: null
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
+        when "sensor_bar"
+          @attributeValues[attrName] =
+            state:
+              sensor: @lastState?[attrName]?.value ? ""
+            remoteGetAction: [remoteAttrName]
+            remoteSetAction: null
+          @_createGetter attrName, () =>
+            return Promise.resolve @attributeValues[attrName].state.sensor
+        when "sensor_gauge"
+          @attributeValues[attrName] =
+            state:
+              sensor: @lastState?[attrName]?.value ? ""
+            remoteGetAction: [remoteAttrName]
+            remoteSetAction: null
+          @_createGetter attrName, () =>
+            return Promise.resolve @attributeValues[attrName].state.sensor
         else
           @attributeValues[attrName] =
             state:
@@ -280,10 +320,12 @@ module.exports = (env) ->
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
 
-      if device.acronym? and device.acronym and remoteDevice.attributes[remoteAttrName].acronym?
-        @attributeValues[attrName].state["acronym"] = remoteDevice.attributes[remoteAttrName].acronym
-      if device.unit? and device.unit and remoteDevice.attributes[remoteAttrName].unit?
-        @attributeValues[attrName].state["unit"] = remoteDevice.attributes[remoteAttrName].unit
+      #if remoteDevice.attributes[remoteAttrName].acronym?
+      #  @attributeValues[attrName].state["acronym"] = remoteDevice.attributes[remoteAttrName].acronym
+      #  device["acronym"] = remoteDevice.attributes[remoteAttrName].acronym
+      #if remoteDevice.attributes[remoteAttrName].unit?
+      #  @attributeValues[attrName].state["unit"] = remoteDevice.attributes[remoteAttrName].unit
+      #  device["unit"] = remoteDevice.attributes[remoteAttrName].unit
       @attributeValues[attrName]["type"] = device.type
       @attributeValues[attrName]["svgId"] = device.svgId
       @attributeValues[attrName]["attrName"] = attrName
@@ -354,6 +396,10 @@ module.exports = (env) ->
           @attributeValues[_attr].state.ct = _receivedValue
 
       #env.logger.info "SetLocalLight _attr: " + _attr + ", _type: " + _type + ", value: " + _receivedValue + ", @attributeValues[_attr].state: " + JSON.stringify(@attributeValues[_attr].state,null,2)
+
+    setLocalVideo: (_attr, _value) =>
+      @attributeValues[_attr].state.sensor = _value
+      @emit _attr, _value
 
     setState: (_attr, _value) =>
       @attributeValues[_attr].state.on = _value
