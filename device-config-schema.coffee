@@ -40,22 +40,7 @@ module.exports = {
               type: "string"
               required: false
             format:
-              description: "Json string with extra formatting of devices like min and max value for gauge or bar"
-              type: "string"
-      colors:
-        description: "Colors used in floorplan device"
-        format: "table"
-        type: "array"
-        default: []
-        required: ["name","color"]
-        items:
-          type: "object"
-          properties:
-            name:
-              description: "Name of device state"
-              enum: ["switchOff", "presenceOff", "contactOff","buttonOff", "lightOff"]
-            color:
-              description: "The hex color for the selected off-state"
+              description: "Json string with extra formatting of devices like colors for states, min and max value for gauge or bar"
               type: "string"
     }
   }
