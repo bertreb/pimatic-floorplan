@@ -66,12 +66,12 @@ The sensor will show the value of the used Pimatic device+attribute. For this fl
 #### sensor_bar
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>',"fill":"\<color>"}). If not set the defaults 0, 100 and 'red' will be used.
-(bar)[https://github.com/bertreb/pimatic-floorplan/blob/master/bar.png]
+![](bar.png)
 
 #### sensor_gauge
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used.
-[gauge](https://github.com/bertreb/pimatic-floorplan/blob/master/gauge.png)
+![](gauge.png)
 
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
