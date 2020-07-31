@@ -33,13 +33,10 @@ devices: "list of devices used in the floorplan"
   name: "The device name"
   svgId: "The object ID used in the svg floorplan"
   type: "The gui type of device
-     ["switch","button","presence","contact","light","sensor"]
+     ["switch","button","presence","contact","light","sensor","sensor_bar","sensor_gauge"]
   pimatic_device_id: "The pimatic device Id"
   pimatic_attribute_name:" The attribute name of the Pimatic device like state, presence or temperature"
-colors: "Array with Colors for the states in the floorplan device"
-  name: "Name of device state"
-    ["switchOff","contactOff","presenceOff","buttonOff", "lightOff"]
-  color: "The hex color number for the off state, for example: #555555"
+  format: "Optional JSON formatted attribute values"
 ```
 Add pimatic devices by there device-id, give them a logical type and optional color the off-states. The default off color for all devices is #dddddd (light gray). The on-state colors are defined by the svg color of the object.
 
@@ -54,7 +51,27 @@ The svgId in the floorplan config must be the object ID in the floorplan svg. Th
 The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
 The color, font size, etc of a text field (sensor values) must be set in the svg editor.
 
+## Devices
+#### switch, presence and contact
+The switch can be used in any svg object that has a color that can be set via the 'fill' attribute. By clicking on the drawing the device will toggle (on<->off) and go from on color to off color.The on color is defined by the svg drawing, the off color is default 'gray' or can be set in the format.
+Format option is: colorOff
 
+#### light
+The light can be used with any svg object that has a color and can be set via the 'fill' attribute. By clicking on the drawing the light will toggle (on<->off) and go from on color to off color. The on color is defined by the color of used pimatic light device. The off color is default 'gray' or can be set in the format.
+Format option is: colorOff.
+
+#### sensor
+The sensor will show the value of the used Pimatic device+attribute. For this floorplan device the svg type must be a TEXT field.
+
+#### sensor_bar
+The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
+In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>',"fill":"\<color>"}). If not set the defaults 0, 100 and 'red' will be used.
+(bar)[https://github.com/bertreb/pimatic-floorplan/blob/master/bar.png]
+
+#### sensor_gauge
+The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
+In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used.
+[gauge](https://github.com/bertreb/pimatic-floorplan/blob/master/gauge.png)
 
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
