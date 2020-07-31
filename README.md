@@ -64,16 +64,19 @@ Format option is: colorOff.
 The sensor will show the value of the used Pimatic device+attribute. For this floorplan device the svg type must be a TEXT field.
 
 #### sensor_bar
+![](bar.png)
+
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>',"fill":"\<color>"}). If not set the defaults 0, 100 and 'red' will be used.
 
-Example ![](bar.png)
 
 #### sensor_gauge
+![](gauge.png)
+
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used.
 
-Example ![](gauge.png)
+
 
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
