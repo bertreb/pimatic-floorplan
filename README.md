@@ -65,15 +65,15 @@ The sensor will show the value of the used Pimatic device+attribute. For this fl
 
 #### sensor_bar
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
-In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>',"fill":"\<color>"}). If not set the defaults 0, 100 and 'red' will be used. 
+In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>',"fill":"\<color>"}). If not set the defaults 0, 100 and 'red' will be used.
 
-Below an example, but any shape is possible!
+Below two examples, any shape is possible!
 
 ![](assets/bar.png) or ![](assets/fish.png)
 
 #### sensor_gauge
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
-In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used. 
+In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used.
 
 Below an example, but any shape is possible!
 
