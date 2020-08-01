@@ -65,7 +65,7 @@ The sensor will show the value of the used Pimatic device+attribute. For this fl
 
 #### sensor_bar
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
-The color and transparancy you set is used in the bar.
+The color and transparancy you set in the svg is used in the bar.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'}). If not set the defaults 0 and 100 will be used.
 
 Below two examples, any shape is possible!
