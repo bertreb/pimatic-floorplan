@@ -75,7 +75,7 @@ Below two examples, any shape is possible!
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used.
 
-Below an example, but any shape is possible!
+Below a gauge example.
 
 ![](assets/gauge.png)
 
