@@ -69,7 +69,7 @@ In the format you can set a minimum and a maximum value ({'min':'\<number>'},'ma
 
 Below an example, but any shape is possible!
 
-![](bar.png) or ![](fish.png)
+![](assets/bar.png) or ![](assets/fish.png)
 
 #### sensor_gauge
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
@@ -77,7 +77,7 @@ In the format you can set a minimum and a maximum value ({'min':'\<number>'},'ma
 
 Below an example, but any shape is possible!
 
-![](gauge.png)
+![](assets/gauge.png)
 
 
 ---
