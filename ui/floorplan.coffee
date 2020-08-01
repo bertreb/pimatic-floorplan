@@ -232,7 +232,7 @@ $(document).on 'templateinit', (event) ->
         _rectStyle.remove()
         #alert(_style)
       else
-        _style = @floorplanDevices[_id].format?.fill ? 'red'
+        _style = @floorplanDevices[_id].format?.fill ? 'fill:red'
 
       @floorplanDevices[_id]["style"] = _style
       _rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
