@@ -1,12 +1,13 @@
 # pimatic-floorplan
 Pimatic plugin for floorplans in the Pimatic gui
 
-## background
+## Background
 Pimatic's standard gui is pimatic-mobile-frontend. This standard gui gives a good and functional interface towards the Pimatic functions.
 The interface is based on jQueryMobile and gives a structured page oriented layout to manage and control devices, rules, etc.
-some home-automation users want a more graphical representation of the gui. This plugin is build for that purpose.
 
-## description
+Some home-automation users want a more graphical representation of the gui. This plugin is build for that purpose.
+
+## Description
 
 This plugin adds a gui option to create 1 or more floorplan devices, for viewing and controlling existing pimatic devices. The concept is as follows:
 - Scalable Vector Graphics (svg) as graphical base for a floorplan.
@@ -16,11 +17,11 @@ This plugin adds a gui option to create 1 or more floorplan devices, for viewing
 - The states of an on/off switch, open/close contact, light, push/release button and present/absent presence sensor are all presented via colors. The colors are configurable. The light  will color depending on the color of the device its connected to.
 - Attribute values can be shown via the sensor field. Optional you can add the acronym and unit of the used device.
 
-## preparation
+## Preparation
 Install the plugin the normal way via the pimatic plugins page or config.json.
 
 
-## creating a floorplan
+## Creating a floorplan
 
 Create a svg floorplan with a background of the room(s) your want to 'floorplan' and add graphics for the devices you want to use. A good and free program for this is [inkscape](https://inkscape.org). The ID tag of a sgv device object need to match the device-attribute in pimatic (see Linking the floorplan svg and pimatic).
 
