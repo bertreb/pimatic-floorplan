@@ -15,10 +15,10 @@ $(document).on 'templateinit', (event) ->
       @floorplanDevices = {}
       for _dev, i in @device.config.devices
         @floorplanDevices[_dev.svgId] = @device.config.devices[i]
-        if _dev.format?.colorOff?
-          @floorplanDevices[_dev.svgId]["colorOff"] = 'fill:' + _dev.format.colorOff
-        else
-          @floorplanDevices[_dev.svgId]["colorOff"] = 'fill:#cccccc'
+        #if _dev.format?.colorOff?
+        #  @floorplanDevices[_dev.svgId]["colorOff"] = 'fill:' + _dev.format.colorOff
+        #else
+        #  @floorplanDevices[_dev.svgId]["colorOff"] = 'fill:#cccccc'
 
 
 
@@ -34,14 +34,7 @@ $(document).on 'templateinit', (event) ->
         svgDoc = a.contentDocument #get the inner DOM of alpha.svg
         @svgRoot = svgDoc.documentElement
 
-        #$(window).resize(()=>
-        #  alert("resize" + $(@svgRoot).width() + ' - ' + $(@svgRoot).height())
-        #  if @gauge?
-        #    @gauge.update()
-        #  )
-
         for i, _device of @floorplanDevices
-          #_id = _device.pimatic_device_id + "_" + _device.pimatic_attribute_name
           _id = _device.svgId
           attribute = @getAttribute(_id)
           if attribute?
@@ -51,9 +44,10 @@ $(document).on 'templateinit', (event) ->
             _onColor = _selector.attr("style")
             try
               _format = JSON.parse(_device.format)
-              @floorplanDevices[_id]["format"] = _format
             catch err
               _format = {}
+            @floorplanDevices[_id]["format"] = _format
+            @floorplanDevices[_id]["colorOff"] = "fill:#cccccc" # _device.format?.colorOn ? _onColor
             @floorplanDevices[_id]["colorOn"] = _onColor # _device.format?.colorOn ? _onColor
 
             switch _device.type
@@ -85,9 +79,7 @@ $(document).on 'templateinit', (event) ->
               when 'light'
                 attributeColor = @getAttribute(_id+@colorAttributeExtension)
                 attributeState = @getAttribute(_id)
-                @floorplanDevices[_id]["colorOn"] = "fill:" + attributeColor.value()
                 @_lightOnOff(_id,attributeState.value())
-                #alert(@lightOn + ' - ' + attribute.value())
                 _selector.on("click", (e)=>
                   _tId = "#" + e.target.id
                   _clickedElement = $(_tId, @svgRoot)
@@ -97,7 +89,6 @@ $(document).on 'templateinit', (event) ->
                   else
                     @_lightOnOff(e.target.id,true)
                     @_setLight(e.target.id,true)
-
                 )
                 @_onRemoteStateChange _id
                 @_onRemoteColorChange _id
@@ -119,9 +110,7 @@ $(document).on 'templateinit', (event) ->
                 @_onRemoteStateChange _id
 
               when 'sensor_gauge'
-                #check if extra charts are on the floorplan
-                _gauge = _id # + "_bar"
-                _tGauge = "#" + _gauge
+                _tGauge = "#" + _id
                 if $(_tGauge, @svgRoot)?
                   _isNumber = not Number.isNaN(attribute.value())
                   if _isNumber
@@ -130,49 +119,27 @@ $(document).on 'templateinit', (event) ->
                     @_onRemoteStateChange _id
 
               when 'sensor_bar'
-                #check if extra charts are on the floorplan
-                _bar = _id # + "_bar"
-                _tBar = "#" + _bar
+                _tBar = "#" + _id
                 if $(_tBar, @svgRoot)?
                   _isNumber = not Number.isNaN(attribute.value())
                   if _isNumber
                     @_createBar(_id)
                     @_setBar(_id, attribute.value())
                     @_onRemoteStateChange _id
-                    ###
-                    @floorplanDevices[_id]["height"] = Number $(_tBar, @svgRoot).attr('height')
-                    @floorplanDevices[_id]["y"] = Number $(_tBar, @svgRoot).attr('y')
-                    @_setBar(_id, attribute.value()) #attribute.value())
-                    _x = Number $(_tBar, @svgRoot).attr('x')
-                    _y = Number $(_tBar, @svgRoot).attr('y')
-                    unless Number.isNaN(_x) or Number.isNaN(_x)
-                      @_createLabel(_bar, 0, 0.2)
-                      @_setBar(_id, Number attribute.value())
-                      @_onRemoteStateChange _id
-                    ###
       )
 
-    _createLabel: (_id, _x, _xp, _y, _yP) =>
-      _xy = @_dom2Svg(_id, _x, _xp, _y, _yP)
-      _text = @floorplanDevices[_id]['label']
-      _text.setAttribute('x', _xy.x)
-      _text.setAttribute('y', _xy.y)
-      _text.setAttribute('class','floorplan-text')
-      _text.style.fill = 'red'
-      _text.style.fontFamily = 'sans-serif'
-      _text.style.fontSize = '3'
-      @svgRoot.appendChild(_text)
-
-    GaugeDefaults =
-      centerX: 50
-      centerY: 50
-
+    
     getCartesian: (cx, cy, radius, angle) =>
       rad = angle * Math.PI / 180
       return {
         x: Math.round((cx + radius * Math.cos(rad)) * 1000) / 1000
         y: Math.round((cy + radius * Math.sin(rad)) * 1000) / 1000
       }
+
+    ###
+    GaugeDefaults =
+      centerX: 50
+      centerY: 50
 
     getDialCoords: (radius, startAngle, endAngle) =>
       cx = GaugeDefaults.centerX
@@ -190,6 +157,7 @@ $(document).on 'templateinit', (event) ->
       _result = ["M", x+start.x, y+start.y, "A", radius, radius, 0, largeArcFlag, 1, x+end.x, y+end.y, "Z"].join(" ")
       alert(_result)
       return _result
+    ###
 
     _dom2Svg: (_id, _x, _xP, _y, _yP) =>
       elem = @svgRoot.getElementById(_id)
@@ -206,8 +174,6 @@ $(document).on 'templateinit', (event) ->
       pt["x"] = (_dom.x+_dom.width)
       pt["y"] = (_dom.y+_dom.height)
       svgP3 = pt.matrixTransform(@svgRoot.getScreenCTM().inverse())
-
-      #alert(svgP3.x+' - '+svgP2.x)
 
       return
         x: svgP.x
@@ -226,11 +192,12 @@ $(document).on 'templateinit', (event) ->
       _w = Math.round(_width)
       _h = Math.round(_height)
 
+      @floorplanDevices[_id]["xy"] = _xy
+
       _rectStyle = @svgRoot.getElementById(_id)
       if _rectStyle?
         _style = _rectStyle.getAttribute('style')
         _rectStyle.remove()
-        #alert(_style)
       else
         _style = @floorplanDevices[_id].format?.fill ? 'fill:red'
 
@@ -245,8 +212,6 @@ $(document).on 'templateinit', (event) ->
       _rect.setAttribute('style',_style)
       @floorplanDevices[_id]["bar"] = _rect
       @svgRoot.appendChild(_rect)
-
-
 
       _txtMin = @_createText(_id, 0, -20, 0, 0)
       _min = Number @floorplanDevices[_id].format?.min ? null
@@ -263,7 +228,7 @@ $(document).on 'templateinit', (event) ->
 
       _valueLabel = @_createText(_id, 0.5, -10, 0, 15, "black")
       _valueLabel.innerHTML = "20"
-      #alert(_valueLabel)
+
       @floorplanDevices[_id]["height"] = _xy.height
       @floorplanDevices[_id]["width"] = _xy.width
       @floorplanDevices[_id]["label"] = _valueLabel
@@ -273,28 +238,13 @@ $(document).on 'templateinit', (event) ->
       @svgRoot.appendChild(_txtMid)
       @svgRoot.appendChild(_txtMax)
 
-
     _createGauge: (_id) =>
-      ###
-      radius = 15
-      startAngle = 180
-      angle = 180
-      flag = 0
-      ###
-
       _xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
       _x = _xy.x
       _y = _xy.y
       _width = _xy.width
       _height = _xy.height
-
-      ###
-      _container = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-      _container.setAttribute('width',_xy.width)
-      _container.setAttribute('height',_xy.height)
-      _container.setAttribute('x',_xy.x)
-      _container.setAttribute('y',_xy.y)
-      ###
+      @floorplanDevices[_id].xy = _xy 
 
       _line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
       _line.setAttribute('x1',_x)
@@ -302,6 +252,27 @@ $(document).on 'templateinit', (event) ->
       _line.setAttribute('x2',_x+_width)
       _line.setAttribute('y2',_y)
       _line.setAttribute('stroke',"red")
+
+
+      _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
+      _radius = _format.radius ? (@floorplanDevices[_id]["radius"] ? 15)
+      #_xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
+      @floorplanDevices[_id]["value"] = @floorplanDevices[_id]["format"]["min"] ? 20
+      coords = @getCartesian(_xy.x, _xy.y, _radius, 180)
+      #@_animateTo(_line, coords)
+      _line.setAttribute('x2',coords.x)
+      _line.setAttribute('y2',coords.y)
+
+      
+      _animateTransform = document.createElementNS('http://www.w3.org/2000/svg','animateTransform')
+      _animateTransform.setAttributeNS(null,'attributeName','transform')
+      _animateTransform.setAttributeNS(null,"attributeType", "XML")
+      _animateTransform.setAttributeNS(null,'type','rotate')
+      _animateTransform.setAttributeNS(null,'dur','1s')
+      _animateTransform.setAttributeNS(null,'repeatCount','1')
+      _line.appendChild(_animateTransform)
+      #_animateTransform.beginElement()
+
       @floorplanDevices[_id]["gauge"] = _line
       @floorplanDevices[_id]["radius"] = _height
       @floorplanDevices[_id]["onColor"] = @svgRoot.getElementById(_id).getAttribute("fill")
@@ -319,23 +290,22 @@ $(document).on 'templateinit', (event) ->
       _max = @floorplanDevices[_id].format?.max ? null
       _txtMax.innerHTML = _max if _max?
 
-      _txtMid = @_createText(_id, 0.5, -10, -1, 0, "green")
-      _maxM = Number _max ? 100
-      _minM = Number _min ? 0
-      _txtMid.innerHTML = Math.round ((_minM + _maxM) / 2)
+      if _min? and _max?
+        _txtMid = @_createText(_id, 0.5, -10, -1, 0, "green")
+        _maxM = Number _max ? 100
+        _minM = Number _min ? 0
+        _txtMid.innerHTML = Math.round ((_minM + _maxM) / 2)
+        @svgRoot.appendChild(_txtMin)
+        @svgRoot.appendChild(_txtMax)
+        @svgRoot.appendChild(_txtMid)
 
       _valueLabel = @_createText(_id, 0.5, -10, 0.05, 0, "white")
-      _valueLabel.innerHTML = "20"
-      #alert(_valueLabel)
+      _valueLabel.innerHTML = _min ? "0"
       @floorplanDevices[_id]["label"] = _valueLabel
 
-      #@svgRoot.appendChild(_container)
       @svgRoot.appendChild(_line)
       @svgRoot.appendChild(_dot)
       @svgRoot.appendChild(_valueLabel)
-      @svgRoot.appendChild(_txtMin)
-      @svgRoot.appendChild(_txtMid)
-      @svgRoot.appendChild(_txtMax)
 
     _createText: (_id, _x, _xP, _y, _yP, _color) =>
       _xy = @_dom2Svg(_id, _x, _xP, _y, _yP)
@@ -355,28 +325,18 @@ $(document).on 'templateinit', (event) ->
       _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
       _min = _format.min ? 0
       _max = _format.max ? 100
-      _valFactor = (value-_min)/(_max-_min)
+      _valFactor = Math.max((value-_min)/(_max-_min),0)
       _height = @floorplanDevices[_id]["height"]
-      _xy = @_dom2Svg(_id, 0, 0, 0, 0)
+      _xy = @floorplanDevices[_id].xy # @_dom2Svg(_id, 0, 0, 0, 0)
       _newY = _xy.y - _height * _valFactor
       _rect = @floorplanDevices[_id]["bar"]
       _rect.setAttribute('y',_newY)
-      _rect.setAttribute('height', Math.round(_height * _valFactor))
-      _rect.setAttribute('style',@floorplanDevices[_id].style)
+      _rect.setAttribute('height', _height * _valFactor)
+      _h = _height * _valFactor
+      #alert('_xy.y:'+_xy.y+', y:'+_newY+', height:'+_h)
+      _rect.setAttribute('style',@floorplanDevices[_id].style+";transition:all 1s;")
 
       @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
-
-      ###
-      if _isNumber?
-        _tBar = '#' + _id # + "_bar"
-        _height = @floorplanDevices[_id]["height"] # Number($(_tId, @svgRoot).attr('height'))
-        _y = @floorplanDevices[_id]["y"] # Number($(_tId, @svgRoot).attr('y'))
-        _y0 = _y + _height
-        _newY = _y0 - _height * value/100
-        _newHeight = _height * value/100
-        $(_tBar, @svgRoot).attr('y', _newY)
-        $(_tBar, @svgRoot).attr('height', _newHeight)
-      ###
 
  
     _setGauge: (_id, value) =>
@@ -384,17 +344,21 @@ $(document).on 'templateinit', (event) ->
       _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
       _min = _format.min ? 0
       _max = _format.max ? 100
-      _val = 180 + (value-_min)*180/(_max-_min)
-      #alert(@floorplanDevices[_id]["radius"])
-      _radius = _format.radius ? (@floorplanDevices[_id]["radius"] ? 15)
+      _curVal = ((Number @floorplanDevices[_id]["value"])-_min)*180/(_max-_min)
+      _newVal = (value-_min)*180/(_max-_min)
 
       _xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
       _line = @floorplanDevices[_id]["gauge"]
-      #_radius = @floorplanDevices[_id]["radius"]
-      #alert(_radius)
-      coords = @getCartesian(_xy.x, _xy.y, _radius, _val)
-      _line.setAttribute('x2',coords.x)
-      _line.setAttribute('y2',coords.y)
+
+      _animateTransform = _line.childNodes[0]
+      #alert(@floorplanDevices[_id]["value"]+' - '+ _curVal+" - "+_newVal)
+      _animateTransform.setAttributeNS(null,'from',_curVal+' '+_xy.x+' '+_xy.y)
+      _animateTransform.setAttributeNS(null,'to',_newVal+' '+_xy.x+' '+_xy.y)
+      _animateTransform.beginElement()
+
+      _line.setAttribute('transform','rotate('+_newVal+' '+_xy.x+' '+_xy.y+')')
+      @floorplanDevices[_id]["value"] = Number value
+
       @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
 
 
@@ -410,6 +374,7 @@ $(document).on 'templateinit', (event) ->
 
     _presenceOnOff: (_id, onoff) =>
       _tId = "#" + _id
+      @floorplanDevices[_id]["state"] = onoff
       if onoff
         _onColor = @floorplanDevices[_id]["colorOn"]
         $(_tId, @svgRoot).attr('style',_onColor)
@@ -419,6 +384,7 @@ $(document).on 'templateinit', (event) ->
 
     _contactOnOff: (_id, onoff) =>
       _tId = "#" + _id
+      @floorplanDevices[_id]["state"] = onoff
       if onoff
         _onColor = @floorplanDevices[_id]["colorOn"]
         $(_tId, @svgRoot).attr('style',_onColor)
