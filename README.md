@@ -5,7 +5,7 @@ Pimatic plugin for floorplans in the Pimatic gui
 Pimatic's standard gui is pimatic-mobile-frontend. This standard gui gives a good and functional interface towards the Pimatic functions.
 The interface is based on jQueryMobile and gives a structured page oriented layout to manage and control devices, rules, etc.
 
-Some home-automation users want a more graphical representation of the gui. This plugin is build for that purpose.
+Some home-automation users want a more graphical representation of the gui. This plugin is build for that purpose and igives you te tools to be creative with the user interface.
 
 ## Description
 
