@@ -23,7 +23,7 @@ Install the plugin the normal way via the pimatic plugins page or config.json.
 
 ## Creating a floorplan
 
-Create a svg floorplan with a background of the room(s) your want to 'floorplan' and add graphics for the devices you want to use. A good and free program for this is [inkscape](https://inkscape.org). The ID tag of a sgv device object need to match the device-attribute in pimatic (see Linking the floorplan svg and pimatic).
+Create a svg floorplan with a background of the room(s) your want to 'floorplan' and add graphics for the devices you want to use. A good and free program for this is [inkscape](https://inkscape.org). The ID tag of a sgv device object can be choosen freely but needs to be unique with one floorplan. The ID tag is used to connect to a pimatic device (see Linking the floorplan svg and pimatic).
 
 Save the created svg file in the public folder of pimatic-mobile-frontend (pimatic-app/node_modules/pimatic-mobile-frontend/public. The filename (incl .svg) is use in the device config.
 
@@ -32,7 +32,7 @@ Create a floorplan device with the following configuration:
 floorplan: "the sgv filename of the floorplan"
 devices: "list of devices used in the floorplan"
   name: "The device name"
-  svgId: "The object ID used in the svg floorplan"
+  svgId: "The ID tag used in the svg floorplan"
   type: "The gui type of device
      ["switch","button","presence","contact","light","sensor","sensor_bar","sensor_gauge"]
   pimatic_device_id: "The pimatic device Id"
@@ -47,14 +47,14 @@ After adding a floorplan please refresh the gui (incl clearing the cache)
 ## Linking the floorplan svg and pimatic
 
 The linking between the svg objects and the pimatic devices devices is done in the floorplan config.
-The svgId in the floorplan config must be the object ID in the floorplan svg. The svg ID can be be freely choosen.
+The svgId in pimatic floorplan device config must be the ID tag in the floorplan svg.
 
-The device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
+The svg device object that you create must have the option to fill it with a color. Otherwise the states colering will obviously not work.
 The color, font size, etc of a text field (sensor values) must be set in the svg editor.
 
 ## Devices
 #### switch, presence and contact
-The switch can be used in any svg object that has a color that can be set via the 'fill' attribute. By clicking on the drawing the device will toggle (on<->off) and go from on color to off color.The on color is defined by the svg drawing, the off color is default 'gray' or can be set in the format.
+The switch can be used in any svg object that has a color that can be set via the 'fill' attribute. By clicking on the drawing the device will toggle (on<->off) and go from on color to off color. The on color is defined by the svg drawing, the off color is default 'gray' or can be set in the format.
 Format option is: colorOff
 
 #### light
@@ -67,15 +67,15 @@ The sensor will show the value of the used Pimatic device+attribute. For this fl
 #### sensor_bar
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
 The color and transparancy you set in the svg is used in the bar.
-In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'}). If not set the defaults 0 and 100 will be used.
+In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'}). If not set the defaults 0 and 100 will be used. If min and max are set; min, mid and max labels are automatically created. Below the bar a text field is created with the actual value.
 
 Below two examples, any shape is possible!
 
 ![](assets/bar.png) or ![](assets/fish.png)
 
 #### sensor_gauge
-The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing a CIRCLE type form must be used.
-In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used.
+The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing preferably a CIRCLE type form is used, but any other shape is possible. The dot (with actual value) an the needle are generated automatically.
+In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used. The gauge is designed to work from left-top-right.
 
 Below a gauge example.
 
