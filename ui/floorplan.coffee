@@ -253,9 +253,8 @@ $(document).on 'templateinit', (event) ->
       _line.setAttribute('y2',_y)
       _line.setAttribute('stroke',"red")
 
-
       _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
-      _radius = _format.radius ? (@floorplanDevices[_id]["radius"] ? 15)
+      _radius = _format.radius ? (@floorplanDevices[_id]["radius"] ? _width/2)
       #_xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
       @floorplanDevices[_id]["value"] = @floorplanDevices[_id]["format"]["min"] ? 20
       coords = @getCartesian(_xy.x, _xy.y, _radius, 180)
