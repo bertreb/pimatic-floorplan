@@ -8,5 +8,5 @@
 	* added bar option for value field
 * 20200723, v0.2.0
 	* linking of svg objects moved to floorplan config
-* 20200723, v0.2.7
+* 20200723, v0.2.8
 	* added bar, gauge and shutter
