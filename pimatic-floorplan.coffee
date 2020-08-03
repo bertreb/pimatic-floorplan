@@ -43,6 +43,15 @@ module.exports = (env) ->
             type: "string"
           state:
             type: "boolean"
+      setShutter:
+        description: 'Shutter control'
+        params:
+          id:
+            type: "string"
+          updown:
+            type: "boolean"
+          stop:
+            type: "boolean"
       buttonPressed:
         description: "Press a button"
         params:
@@ -86,6 +95,8 @@ module.exports = (env) ->
               switch d.type
                 when 'light'
                   getRemoteLight(d.remoteDevice,_getter, d.attrName, d.remoteAttrName)
+                when 'shutter'
+                  getRemoteShutter(d.remoteDevice, _getter, d.attrName, d.remoteAttrName)
                 when 'sensor'
                   getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
                 when 'sensor_bar'
@@ -106,6 +117,11 @@ module.exports = (env) ->
         _device[_getter]()
         .then((value)=>
           @setLocalState(_attrName, value)
+        )
+      getRemoteShutter = (_device, _getter, _attrName, _action) =>
+        _device[_getter]()
+        .then((value)=>
+          @setLocalShutter(_attrName, value)
         )
       getRemoteSensor = (_device, _attrName, _remoteAttrName) =>
         _name = _device.config.id + "." + _remoteAttrName
@@ -136,6 +152,9 @@ module.exports = (env) ->
                 when "light"
                   #env.logger.info "_attr " + _attr + ", attrName: " + attrEvent.attributeName + ", value " + attrEvent.value
                   @setLocalLight(_attr, attrEvent.attributeName, attrEvent.value)
+                when "shutter"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalShutter(_attr, attrEvent.value)
                 when "sensor"
                   if attrEvent.attributeName is _remoteDevice.remoteAttrName
                     @setLocalSensor(_attr, attrEvent.value)
@@ -205,6 +224,13 @@ module.exports = (env) ->
                 @addAttribute(_colorAttrName,
                   description: "remote device color " + _colorAttrName ? ""
                   type: "string" #_deviceAttrType
+                )
+              when "shutter"
+                _attrName = _device.svgId
+                _deviceAttrType = "string"
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: _deviceAttrType
                 )
               when "sensor"
                 _attrName = _device.svgId
@@ -290,6 +316,14 @@ module.exports = (env) ->
             remoteSetAction: 'buttonPressed'
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.button
+        when "shutter"
+          @attributeValues[attrName] =
+            state:
+              position: @lastState?[attrName]?.value ? ""
+            remoteGetAction: [remoteAttrName]
+            remoteSetAction: null
+          @_createGetter attrName, () =>
+            return Promise.resolve @attributeValues[attrName].state.position
         when "sensor"
           @attributeValues[attrName] =
             state:
@@ -370,6 +404,10 @@ module.exports = (env) ->
       @attributeValues[_attr].state.sensor = _totalValue
       @emit _attr, _totalValue
 
+    setLocalShutter: (_attr, _value) =>
+      @attributeValues[_attr].state.position = _value
+      @emit _attr, _value
+
     setLocalButton: (_attr, _value) =>
       @attributeValues[_attr].state.button = _value
       @emit _attr, _value
@@ -408,6 +446,18 @@ module.exports = (env) ->
       @attributeValues[_attr].state.on = _value
       _setter = @attributeValues[_attr].remoteSetAction
       @attributeValues[_attr].remoteDevice[_setter](_value)
+
+    setShutter: (_attr, _updown, _stop) =>
+      @attributeValues[_attr].state.on = _value
+      if _stop
+        _setter = 'stop' #@attributeValues[_attr].remoteSetAction
+      else
+        if _updown
+          _setter = 'moveUp'
+        else
+          _setter = 'moveDown'
+      #_setter = @attributeValues[_attr].remoteSetAction
+      @attributeValues[_attr].remoteDevice[_setter]()
 
     setLight:(_attr, _lightState) =>
       _setter = @attributeValues[_attr].remoteSetAction

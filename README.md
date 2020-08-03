@@ -64,6 +64,7 @@ Format option is: colorOff.
 #### sensor
 The sensor will show the value of the used Pimatic device+attribute. For this floorplan device the svg type must be a TEXT field.
 
+
 #### sensor_bar
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
 The color and transparancy you set in the svg is used in the bar.
@@ -72,6 +73,13 @@ In the format you can set a minimum and a maximum value ({'min':'\<number>'},'ma
 Below two examples, any shape is possible!
 
 ![](assets/bar.png) or ![](assets/fish.png)
+
+#### shutter
+The sensor will show the position of the shutter of the used Pimatic shutter device or variable. The svg setup is the same as for the sensor_bar. The shutter does not have labels on the left side for postion, only the current value below the bottom.
+
+Below an example, any shape or window background is possible!
+
+![](assets/shutter.png)
 
 #### sensor_gauge
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing preferably a CIRCLE type form is used, but any other shape is possible. The dot (with actual value) an the needle are generated automatically.
