@@ -53,19 +53,19 @@ The svg device object that you create must have the option to fill it with a col
 The color, font size, etc of a text field (sensor values) must be set in the svg editor.
 
 ## Devices
-#### switch, presence and contact
+#### Switch, Presence and Contact
 The switch can be used in any svg object that has a color that can be set via the 'fill' attribute. By clicking on the drawing the device will toggle (on<->off) and go from on color to off color. The on color is defined by the svg drawing, the off color is default 'gray' or can be set in the format.
 Format option is: colorOff
 
-#### light
+#### Light
 The light can be used with any svg object that has a color and can be set via the 'fill' attribute. By clicking on the drawing the light will toggle (on<->off) and go from on color to off color. The on color is defined by the color of used pimatic light device. The off color is default 'gray' or can be set in the format.
 Format option is: colorOff.
 
-#### sensor
+#### Sensor
 The sensor will show the value of the used Pimatic device+attribute. For this floorplan device the svg type must be a TEXT field.
 
 
-#### sensor_bar
+#### Sensor_bar
 The sensor bar will show a Pimatic device+attribute value in a bar form. In the svg drawing a RECT type form must be used.
 The color and transparancy you set in the svg is used in the bar.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'}). If not set the defaults 0 and 100 will be used. If min and max are set; min, mid and max labels are automatically created. Below the bar a text field is created with the actual value.
@@ -74,14 +74,14 @@ Below two examples, any shape is possible!
 
 ![](assets/bar.png) or ![](assets/fish.png)
 
-#### shutter
+#### Shutter
 The sensor will show the position of the shutter of the used Pimatic shutter device or variable. The svg setup is the same as for the sensor_bar. The shutter does not have labels on the left side for postion, only the current value below the bottom.
 
 Below an example, any shape or window background is possible!
 
 ![](assets/shutter.png)
 
-#### sensor_gauge
+#### Sensor_gauge
 The sensor gauge will show a Pimatic device+attribute value in a gauge form. In the svg drawing preferably a CIRCLE type form is used, but any other shape is possible. The dot (with actual value) an the needle are generated automatically.
 In the format you can set a minimum and a maximum value ({'min':'\<number>'},'max':'\<number>'). If not set the defaults 0, 100 and 'red' will be used. The gauge is designed to work from left-top-right.
 
@@ -89,7 +89,7 @@ Below a gauge example.
 
 ![](assets/gauge.png)
 
-#### camera
+#### Camera
 The camera will show an network stream (or image). In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
 In the device config format field, you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that. The label with the camera name is automatically created.
 
