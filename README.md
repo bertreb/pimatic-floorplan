@@ -91,7 +91,7 @@ Below a gauge example.
 
 #### camera
 The camera will show an network stream (or image). In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
-In the device config format field, you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that.
+In the device config format field, you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that. The label with the camera name is automatically created.
 
 Below a camera example.
 
