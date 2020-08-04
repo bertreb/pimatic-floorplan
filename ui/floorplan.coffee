@@ -101,6 +101,15 @@ $(document).on 'templateinit', (event) ->
                 @_contactOnOff(_id,attribute.value())
                 @_onRemoteStateChange _id
 
+              when 'shutter'
+                _tShutter = "#" + _id
+                if $(_tShutter, @svgRoot)?
+                  _isNumber = not Number.isNaN(attribute.value())
+                  if _isNumber
+                    @_createShutter(_id)
+                    @_setShutter(_id, attribute.value())
+                    @_onRemoteStateChange _id
+
               when 'sensor'
                 _color = $(_tId, @svgRoot).css('fill')
                 if _selector.text() isnt ""
@@ -126,6 +135,11 @@ $(document).on 'templateinit', (event) ->
                     @_createBar(_id)
                     @_setBar(_id, attribute.value())
                     @_onRemoteStateChange _id
+
+              when 'camera'
+                @_createCamera(_id)
+                @_setState(_id,attribute.value())
+                @_onRemoteStateChange _id                
       )
 
     
@@ -181,6 +195,45 @@ $(document).on 'templateinit', (event) ->
         width: Number svgP3.x - Number svgP2.x
         height: Number svgP3.y - Number svgP2.y
 
+    _createShutter: (_id) =>
+
+      _xy = @_dom2Svg(_id, 0, 0.5, -1, 0)
+      _x = Number _xy.x
+      _y = Number _xy.y # - Number _xy.height
+      _width = Number _xy.width
+      _height = Number _xy.height
+      _w = Math.round(_width)
+      _h = Math.round(_height)
+
+      @floorplanDevices[_id]["xy"] = _xy
+
+      _rectStyle = @svgRoot.getElementById(_id)
+      if _rectStyle?
+        _style = _rectStyle.getAttribute('style')
+        _rectStyle.remove()
+      else
+        _style = @floorplanDevices[_id].format?.fill ? 'fill:red'
+
+      @floorplanDevices[_id]["style"] = _style
+      _rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+
+      _rect.setAttribute('id',_id)
+      _rect.setAttribute('x',_x)
+      _rect.setAttribute('y',_y)
+      _rect.setAttribute('width',_w)
+      _rect.setAttribute('height',_height)
+      _rect.setAttribute('style',_style)
+      @floorplanDevices[_id]["shutter"] = _rect
+      @svgRoot.appendChild(_rect)
+
+      _valueLabel = @_createText(_id, 0.5, -10, 0, 15, "black")
+      _valueLabel.innerHTML = "20"
+
+      @floorplanDevices[_id]["height"] = _xy.height
+      @floorplanDevices[_id]["width"] = _xy.width
+      @floorplanDevices[_id]["label"] = _valueLabel
+
+      @svgRoot.appendChild(_valueLabel)
 
     _createBar: (_id) =>
 
@@ -213,15 +266,15 @@ $(document).on 'templateinit', (event) ->
       @floorplanDevices[_id]["bar"] = _rect
       @svgRoot.appendChild(_rect)
 
-      _txtMin = @_createText(_id, 0, -20, 0, 0)
+      _txtMin = @_createText(_id, 0, -15, 0, 0)
       _min = Number @floorplanDevices[_id].format?.min ? null
       _txtMin.innerHTML = _min if _min?
 
-      _txtMax = @_createText(_id, 0, -20, -1, 0)
+      _txtMax = @_createText(_id, 0, -15, -1, 0)
       _max = Number @floorplanDevices[_id].format?.max ? null
       _txtMax.innerHTML = _max if _max?
 
-      _txtMid = @_createText(_id, 0, -20, -0.5, 0)
+      _txtMid = @_createText(_id, 0, -15, -0.5, 0)
       _maxM = Number _max ? 100
       _minM = Number _min ? 0
       _txtMid.innerHTML = Math.round ((_minM + _maxM) / 2)
@@ -261,7 +314,6 @@ $(document).on 'templateinit', (event) ->
       #@_animateTo(_line, coords)
       _line.setAttribute('x2',coords.x)
       _line.setAttribute('y2',coords.y)
-
       
       _animateTransform = document.createElementNS('http://www.w3.org/2000/svg','animateTransform')
       _animateTransform.setAttributeNS(null,'attributeName','transform')
@@ -306,6 +358,26 @@ $(document).on 'templateinit', (event) ->
       @svgRoot.appendChild(_dot)
       @svgRoot.appendChild(_valueLabel)
 
+    _createCamera: (_id) =>
+      _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
+      _url = _format.camera
+      _xy = @_dom2Svg(_id, 0, 0, -1, 0)
+      _image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
+      _image.setAttributeNS(null,'x',_xy.x)
+      _image.setAttributeNS(null,'y',_xy.y)
+      _image.setAttributeNS(null,'width',_xy.width)
+      _image.setAttributeNS(null,'height',_xy.height)
+      _image.setAttributeNS('http://www.w3.org/1999/xlink','href', _url)
+
+      @floorplanDevices[_id]["camera"] = _image
+
+      _valueLabel = @_createText(_id, 0.5, -20, 0.1, 0, "black")
+      @floorplanDevices[_id]["label"] = _valueLabel
+      _valueLabel.innerHTML = _id
+
+      @svgRoot.appendChild(_image)
+      @svgRoot.appendChild(_valueLabel)
+
     _createText: (_id, _x, _xP, _y, _yP, _color) =>
       _xy = @_dom2Svg(_id, _x, _xP, _y, _yP)
       _x1 = _xy.x
@@ -314,9 +386,10 @@ $(document).on 'templateinit', (event) ->
       _txtLbl.setAttribute('x',_x1)
       _txtLbl.setAttribute('y',_y1)
       _txtColor = if _color? then _color else "black"
+      #_txtLbl.setAttribute('style','fill:'+_txtColor+';fontFamily:sans-serif;fontSize:3;')
       _txtLbl.style.fill = _txtColor
-      _txtLbl.style.fontFamily = 'sans-serif'
-      _txtLbl.style.fontSize = '3'
+      _txtLbl.style['font-family'] = 'sans-serif'
+      _txtLbl.style['font-size'] = '3px'
       return _txtLbl
 
     _setBar: (_id, value) =>
@@ -336,7 +409,6 @@ $(document).on 'templateinit', (event) ->
       _rect.setAttribute('style',@floorplanDevices[_id].style+";transition:all 1s;")
 
       @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
-
  
     _setGauge: (_id, value) =>
       # value 0=180 -> 40=360
@@ -350,7 +422,6 @@ $(document).on 'templateinit', (event) ->
       _line = @floorplanDevices[_id]["gauge"]
 
       _animateTransform = _line.childNodes[0]
-      #alert(@floorplanDevices[_id]["value"]+' - '+ _curVal+" - "+_newVal)
       _animateTransform.setAttributeNS(null,'from',_curVal+' '+_xy.x+' '+_xy.y)
       _animateTransform.setAttributeNS(null,'to',_newVal+' '+_xy.x+' '+_xy.y)
       _animateTransform.beginElement()
@@ -359,6 +430,35 @@ $(document).on 'templateinit', (event) ->
       @floorplanDevices[_id]["value"] = Number value
 
       @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
+
+    _setShutter: (_id, value) =>
+      _isNumber = not Number.isNaN(value)
+      _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
+      _min = 0
+      _max = 100
+      _valFactor = Math.max((value-_min)/(_max-_min),0)
+      _height = @floorplanDevices[_id]["height"]
+      _xy = @floorplanDevices[_id].xy # @_dom2Svg(_id, 0, 0, 0, 0)
+      _newY = _xy.y # - _height * _valFactor
+      _rect = @floorplanDevices[_id]["shutter"]
+      _rect.setAttribute('y',_newY)
+      _rect.setAttribute('height', _height * (1 - _valFactor))
+      _h = _height * _valFactor
+      _dur = 
+      _rect.setAttribute('style',@floorplanDevices[_id].style+";transition:all 2s;")
+
+      @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
+
+    _setCamera: (_id, value) =>
+      _camera = @floorplanDevices[_id].camera
+      if Boolean value is true
+        @svgRoot.appendChild(_camera)
+        @floorplanDevices[_id]["label"].innerHTML = _id
+        @floorplanDevices[_id].state = true
+      else
+        @svgRoot.removeChild(_camera)
+        @floorplanDevices[_id]["label"].innerHTML = _id + " - OFF"
+        @floorplanDevices[_id].state = false
 
 
     _switchOnOff: (_id, onoff) =>
@@ -401,6 +501,17 @@ $(document).on 'templateinit', (event) ->
         _offColor = @floorplanDevices[_id]["colorOff"]
         $(_tId, @svgRoot).attr('style',_offColor)
 
+    _cameraOnOff: (_id, onoff) =>
+      _tId = "#" + _id
+      @floorplanDevices[_id]["state"] = onoff
+      if onoff
+        _onColor = @floorplanDevices[_id]["colorOn"]
+        #$(_tId, @svgRoot).attr('style',_onColor)
+      else
+        _offColor = @floorplanDevices[_id]["colorOff"]
+        $(_tId, @svgRoot).attr('style',_offColor)
+
+
     _buttonOnOff: (_id, onoff) =>
       _tId = "#" + _id
       _offColor = @floorplanDevices[_id]["colorOff"]
@@ -441,6 +552,8 @@ $(document).on 'templateinit', (event) ->
             @_contactOnOff(_id,newValue)
           when 'light'
             @_lightOnOff(_id, newValue)
+          when 'shutter'
+            @_setShutter(_id, newValue)
           when 'sensor'
             _color = $(_tId, @svgRoot).css('fill')
             if $(_tId, @svgRoot).text() isnt ""
@@ -453,6 +566,8 @@ $(document).on 'templateinit', (event) ->
           when 'sensor_gauge'
             t = "Sensor_gauge empty"
             @_setGauge(_id, Number newValue)
+          when 'camera'
+            @_setCamera(_id,newValue)
 
 
 
