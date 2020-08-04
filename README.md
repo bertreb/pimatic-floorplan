@@ -5,7 +5,7 @@ Pimatic plugin for floorplans in the Pimatic gui
 Pimatic's standard gui is pimatic-mobile-frontend. This standard gui gives a good and functional interface towards the Pimatic functions.
 The interface is based on jQueryMobile and gives a structured page oriented layout to manage and control devices, rules, etc.
 
-Some home-automation users want a more graphical representation of the gui. This plugin is build for that purpose and igives you te tools to be creative with the user interface.
+Some home-automation users want a more graphical representation of the gui. This plugin is build for that purpose and gives you the tools to be creative with the user interface.
 
 ## Description
 
@@ -13,7 +13,7 @@ This plugin adds a gui option to create 1 or more floorplan devices, for viewing
 - Scalable Vector Graphics (svg) as graphical base for a floorplan.
 - Manual adding of devices that must be shown on the floorplan.
 - Free choice of shapes for background and the pimatic devices, as long as they are linked to pimatic (see Linking the floorplan svg and pimatic).
-- The supported devices are: switch, presence, contact, light, button and sensor (text/value display).
+- The supported devices are: switch, presence, contact, light, button, sensor (text/value display), sensor_bar, sensor_gauge and camera.
 - The states of an on/off switch, open/close contact, light, push/release button and present/absent presence sensor are all presented via colors. The colors are configurable. The light  will color depending on the color of the device its connected to.
 - Attribute values can be shown via the sensor field. Optional you can add the acronym and unit of the used device.
 
@@ -90,10 +90,10 @@ Below a gauge example.
 ![](assets/gauge.png)
 
 #### camera
-The camera will show an image or network stream. In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
-In the format you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that.
+The camera will show an network stream (or image). In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
+In the device config format field, you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that.
 
-Below a gauge example.
+Below a camera example.
 
 ![](assets/camera.png)
 
