@@ -164,7 +164,9 @@ module.exports = (env) ->
                 when "sensor_gauge"
                   if attrEvent.attributeName is _remoteDevice.remoteAttrName
                     @setLocalSensor(_attr, attrEvent.value)
-
+                when "camera"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalState(_attr, attrEvent.value)
 
 
       for _device in @config.devices
@@ -179,22 +181,22 @@ module.exports = (env) ->
               throw new Error "You can't add floorplan devices"
             switch _device.type
               when "switch"
+                _attrName = _device.svgId
                 _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                 @addAttribute(_attrName,
                   description: "remote device " + _attrName ? ""
                   type: if _deviceAttrType is "boolean" then "boolean" else "string"
                 )
               when "presence"
+                _attrName = _device.svgId
                 _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                 @addAttribute(_attrName,
                   description: "remote device " + _attrName ? ""
                   type: if _deviceAttrType is "boolean" then "boolean" else "string"
                 )
               when "contact"
+                _attrName = _device.svgId
                 _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
-                _attrName = _device.svgId # _device.pimatic_device_id + '_' + _device.pimatic_attribute_name
                 @addAttribute(_attrName,
                   description: "remote device " + _attrName ? ""
                   type: if _deviceAttrType is "boolean" then "boolean" else "string"
@@ -252,6 +254,13 @@ module.exports = (env) ->
                 @addAttribute(_attrName,
                   description: "remote device " + _attrName ? ""
                   type: _deviceAttrType
+                )
+              when "camera"
+                _attrName = _device.svgId
+                _deviceAttrType =_fullDevice.attributes[_device.pimatic_attribute_name].type
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: if _deviceAttrType is "boolean" then "boolean" else "string"
                 )
               else
                 throw new Error "Device type '#{_device.type}' of device '#{_device.id}' not supported"
@@ -348,6 +357,14 @@ module.exports = (env) ->
             remoteSetAction: null
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
+        when "camera"
+          @attributeValues[attrName] =
+            state:
+              on: @lastState?[attrName]?.value ? ""
+            remoteGetAction: ['state']
+            remoteSetAction: 'changeStateTo'
+          @_createGetter attrName, () =>
+            return Promise.resolve @attributeValues[attrName].state.on
         else
           @attributeValues[attrName] =
             state:

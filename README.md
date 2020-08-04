@@ -89,6 +89,14 @@ Below a gauge example.
 
 ![](assets/gauge.png)
 
+#### camera
+The camera will show an image or network stream. In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
+In the format you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that.
+
+Below a gauge example.
+
+![](assets/camera.png)
+
 
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
