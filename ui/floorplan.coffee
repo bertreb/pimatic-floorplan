@@ -29,10 +29,12 @@ $(document).on 'templateinit', (event) ->
       ### Apply UI elements ###
 
 
+
       a = document.getElementById(@id)
       a.addEventListener("load",() =>
         svgDoc = a.contentDocument #get the inner DOM of alpha.svg
         @svgRoot = svgDoc.documentElement
+
 
         for i, _device of @floorplanDevices
           _id = _device.svgId
@@ -52,6 +54,8 @@ $(document).on 'templateinit', (event) ->
 
             switch _device.type
               when 'switch'
+                #_switchLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
+                #@floorplanDevices[_id]["label"] = _switchLabel
                 @_switchOnOff(_id,attribute.value())
                 _selector.on("click", (e)=>
                   _tId = "#" + e.target.id
@@ -67,6 +71,8 @@ $(document).on 'templateinit', (event) ->
                 @_onRemoteStateChange _id
 
               when 'button'
+                #_buttonLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
+                #@floorplanDevices[_id]["label"] = _buttonLabel
                 @_buttonOnOff(_id, false)
                 _selector.on("click", (e)=>
                   _tId = "#" + e.target.id
@@ -94,10 +100,14 @@ $(document).on 'templateinit', (event) ->
                 @_onRemoteColorChange _id
 
               when 'presence'
+                #_presenceLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
+                #@floorplanDevices[_id]["label"] = _presenceLabel
                 @_presenceOnOff(_id,attribute.value())
                 @_onRemoteStateChange _id
 
               when 'contact'
+                #_contactLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
+                #@floorplanDevices[_id]["label"] = _contactLabel
                 @_contactOnOff(_id,attribute.value())
                 @_onRemoteStateChange _id
 
@@ -137,8 +147,10 @@ $(document).on 'templateinit', (event) ->
                     @_onRemoteStateChange _id
 
               when 'camera'
-                @_createCamera(_id)
-                @_setState(_id,attribute.value())
+                #@_createCamera(_id)
+                @floorplanDevices[_id]["camera"] = null
+                @_createCameraLabel(_id)
+                @_setCamera(_id,attribute.value())
                 @_onRemoteStateChange _id                
       )
 
@@ -370,26 +382,39 @@ $(document).on 'templateinit', (event) ->
       _image.setAttributeNS('http://www.w3.org/1999/xlink','href', _url)
 
       @floorplanDevices[_id]["camera"] = _image
+      @svgRoot.appendChild(_image)
 
+    _createCameraLabel: (_id) =>
       _valueLabel = @_createText(_id, 0.5, -20, 0.1, 0, "black")
       @floorplanDevices[_id]["label"] = _valueLabel
-      _valueLabel.innerHTML = _id
-
-      @svgRoot.appendChild(_image)
+      _valueLabel.innerHTML = @floorplanDevices[_id].name ? _id
       @svgRoot.appendChild(_valueLabel)
 
-    _createText: (_id, _x, _xP, _y, _yP, _color) =>
+
+    _createText: (_id, _x, _xP, _y, _yP, _color, _text) =>
       _xy = @_dom2Svg(_id, _x, _xP, _y, _yP)
       _x1 = _xy.x
       _y1 = _xy.y
       _txtLbl = document.createElementNS('http://www.w3.org/2000/svg', 'text')
-      _txtLbl.setAttribute('x',_x1)
+      _txtLbl.setAttribute('id',_id+"_label")
+      _txtLbl.style['font-family'] = 'sans-serif'
+      _txtLbl.style['font-size'] = '3px'
+
+      @svgRoot.appendChild(_txtLbl)
+      if _text?
+        _txtLbl.innerHTML = _text
+        #alert($('#'+_id+"_label",@svgRoot).width())
+        _delta = Number $('#'+_id+"_label",@svgRoot).width()/2
+        #alert(_delta)
+        _x1Center = _x1 - _delta
+      else
+        _x1Center = _x1
+      _txtLbl.setAttribute('x',_x1Center)
       _txtLbl.setAttribute('y',_y1)
       _txtColor = if _color? then _color else "black"
       #_txtLbl.setAttribute('style','fill:'+_txtColor+';fontFamily:sans-serif;fontSize:3;')
       _txtLbl.style.fill = _txtColor
-      _txtLbl.style['font-family'] = 'sans-serif'
-      _txtLbl.style['font-size'] = '3px'
+
       return _txtLbl
 
     _setBar: (_id, value) =>
@@ -451,13 +476,19 @@ $(document).on 'templateinit', (event) ->
 
     _setCamera: (_id, value) =>
       _camera = @floorplanDevices[_id].camera
+      _label = @floorplanDevices[_id].name ? _id
+      #_url = @floorplanDevices[_id].format.camera
+
+      if _camera?
+        @svgRoot.removeChild(_camera)
       if Boolean value is true
-        @svgRoot.appendChild(_camera)
-        @floorplanDevices[_id]["label"].innerHTML = _id
+        #_camera.setAttributeNS(null,'href',_url)
+        @_createCamera(_id)
+        @floorplanDevices[_id]["label"].innerHTML = _label
         @floorplanDevices[_id].state = true
       else
-        @svgRoot.removeChild(_camera)
-        @floorplanDevices[_id]["label"].innerHTML = _id + " - OFF"
+        #_camera.setAttributeNS(null,'href',"leaf.png")
+        @floorplanDevices[_id]["label"].innerHTML = _label + " - OFF"
         @floorplanDevices[_id].state = false
 
 
@@ -568,6 +599,8 @@ $(document).on 'templateinit', (event) ->
             @_setGauge(_id, Number newValue)
           when 'camera'
             @_setCamera(_id,newValue)
+            unless newValue
+              document.location.reload()
 
 
 
