@@ -10,3 +10,5 @@
 	* linking of svg objects moved to floorplan config
 * 20200723, v0.2.8
 	* added bar, gauge and shutter
+* 20200805, v0.2.10
+	* added camera
