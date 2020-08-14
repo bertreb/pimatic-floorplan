@@ -35,6 +35,15 @@ $(document).on 'templateinit', (event) ->
         svgDoc = a.contentDocument #get the inner DOM of alpha.svg
         @svgRoot = svgDoc.documentElement
 
+        
+        #$(@svgRoot).on("click", (e)=>
+        #  @panZoom.zoomIn()
+        #  #@panZoom.fit()
+        #)
+        $(@svgRoot).on("dblclick", (e)=>
+          @panZoom.center()
+          @panZoom.fit()
+        )
 
         for i, _device of @floorplanDevices
           _id = _device.svgId
@@ -54,29 +63,20 @@ $(document).on 'templateinit', (event) ->
 
             switch _device.type
               when 'switch'
-                #_switchLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
-                #@floorplanDevices[_id]["label"] = _switchLabel
                 @_switchOnOff(_id,attribute.value())
                 _selector.on("click", (e)=>
-                  _tId = "#" + e.target.id
-                  _clickedElement = $(_tId, @svgRoot)
-                  if @floorplanDevices[e.target.id].state # _clickedElement.attr("style") == @floorplanDevices[e.target.id]["colorOn"]
+                  if @floorplanDevices[e.target.id].state
                     @_switchOnOff(e.target.id,false)
                     @_setState(e.target.id, false)
                   else
                     @_switchOnOff(e.target.id,true)
                     @_setState(e.target.id, true)
                 )
-                #@_createLabel(_id)
                 @_onRemoteStateChange _id
 
               when 'button'
-                #_buttonLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
-                #@floorplanDevices[_id]["label"] = _buttonLabel
                 @_buttonOnOff(_id, false)
                 _selector.on("click", (e)=>
-                  _tId = "#" + e.target.id
-                  _clickedElement = $(_tId, @svgRoot)
                   @_buttonOnOff(e.target.id, true)
                   @_setButton(e.target.id)
                 )
@@ -87,9 +87,7 @@ $(document).on 'templateinit', (event) ->
                 attributeState = @getAttribute(_id)
                 @_lightOnOff(_id,attributeState.value())
                 _selector.on("click", (e)=>
-                  _tId = "#" + e.target.id
-                  _clickedElement = $(_tId, @svgRoot)
-                  if @floorplanDevices[e.target.id].state # _clickedElement.attr("style") == @floorplanDevices[e.target.id]["colorOn"]
+                  if @floorplanDevices[e.target.id].state
                     @_lightOnOff(e.target.id,false)
                     @_setLight(e.target.id,false)
                   else
@@ -100,14 +98,10 @@ $(document).on 'templateinit', (event) ->
                 @_onRemoteColorChange _id
 
               when 'presence'
-                #_presenceLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
-                #@floorplanDevices[_id]["label"] = _presenceLabel
                 @_presenceOnOff(_id,attribute.value())
                 @_onRemoteStateChange _id
 
               when 'contact'
-                #_contactLabel = @_createText(_id,0.5,0,0,20,null,@floorplanDevices[_id].name)
-                #@floorplanDevices[_id]["label"] = _contactLabel
                 @_contactOnOff(_id,attribute.value())
                 @_onRemoteStateChange _id
 
@@ -137,6 +131,15 @@ $(document).on 'templateinit', (event) ->
                     @_setGauge(_id, attribute.value())
                     @_onRemoteStateChange _id
 
+              when 'clock'
+                _tClock = "#" + _id
+                if $(_tClock, @svgRoot)?
+                  _isNumber = not Number.isNaN(attribute.value())
+                  if _isNumber # number is type of clock
+                    @_createClock(_id)
+                    @_setClock(_id, attribute.value())
+                    @_onRemoteStateChange _id
+
               when 'sensor_bar'
                 _tBar = "#" + _id
                 if $(_tBar, @svgRoot)?
@@ -147,11 +150,13 @@ $(document).on 'templateinit', (event) ->
                     @_onRemoteStateChange _id
 
               when 'camera'
-                #@_createCamera(_id)
-                @floorplanDevices[_id]["camera"] = null
+                @_createCamera(_id)
                 @_createCameraLabel(_id)
                 @_setCamera(_id,attribute.value())
                 @_onRemoteStateChange _id                
+
+        @panZoom = svgPanZoom(@svgRoot, {dblClickZoomEnabled:false, preventMouseEventsDefault:false, zoomScaleSensitivity:0.5})
+
       )
 
     
@@ -162,32 +167,11 @@ $(document).on 'templateinit', (event) ->
         y: Math.round((cy + radius * Math.sin(rad)) * 1000) / 1000
       }
 
-    ###
-    GaugeDefaults =
-      centerX: 50
-      centerY: 50
-
-    getDialCoords: (radius, startAngle, endAngle) =>
-      cx = GaugeDefaults.centerX
-      cy = GaugeDefaults.centerY
-      return {
-        end: @getCartesian(cx, cy, radius, endAngle)
-        start: @getCartesian(cx, cy, radius, startAngle)
-      }
-
-    pathString: (radius, startAngle, endAngle, largeArc, x, y) =>
-      coords = @getDialCoords(radius, startAngle, endAngle)
-      start = coords.start
-      end = coords.end
-      largeArcFlag = 1 #typeof(largeArc) is "undefined" ? 1 : largeArc
-      _result = ["M", x+start.x, y+start.y, "A", radius, radius, 0, largeArcFlag, 1, x+end.x, y+end.y, "Z"].join(" ")
-      alert(_result)
-      return _result
-    ###
-
     _dom2Svg: (_id, _x, _xP, _y, _yP) =>
       elem = @svgRoot.getElementById(_id)
       _dom = elem.getBoundingClientRect()
+
+      #alert(JSON.stringify(_dom,null,2))
  
       pt = @svgRoot.createSVGPoint()
       pt["x"] = (_dom.x + _dom.width*_x + _xP)
@@ -208,7 +192,6 @@ $(document).on 'templateinit', (event) ->
         height: Number svgP3.y - Number svgP2.y
 
     _createShutter: (_id) =>
-
       _xy = @_dom2Svg(_id, 0, 0.5, -1, 0)
       _x = Number _xy.x
       _y = Number _xy.y # - Number _xy.height
@@ -248,7 +231,6 @@ $(document).on 'templateinit', (event) ->
       @svgRoot.appendChild(_valueLabel)
 
     _createBar: (_id) =>
-
       _xy = @_dom2Svg(_id, 0, 0.5, 0, 0)
       _x = Number _xy.x
       _y = Number _xy.y - Number _xy.height
@@ -320,10 +302,8 @@ $(document).on 'templateinit', (event) ->
 
       _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
       _radius = _format.radius ? (@floorplanDevices[_id]["radius"] ? _width/2)
-      #_xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
       @floorplanDevices[_id]["value"] = @floorplanDevices[_id]["format"]["min"] ? 20
       coords = @getCartesian(_xy.x, _xy.y, _radius, 180)
-      #@_animateTo(_line, coords)
       _line.setAttribute('x2',coords.x)
       _line.setAttribute('y2',coords.y)
       
@@ -334,7 +314,6 @@ $(document).on 'templateinit', (event) ->
       _animateTransform.setAttributeNS(null,'dur','1s')
       _animateTransform.setAttributeNS(null,'repeatCount','1')
       _line.appendChild(_animateTransform)
-      #_animateTransform.beginElement()
 
       @floorplanDevices[_id]["gauge"] = _line
       @floorplanDevices[_id]["radius"] = _height
@@ -370,10 +349,81 @@ $(document).on 'templateinit', (event) ->
       @svgRoot.appendChild(_dot)
       @svgRoot.appendChild(_valueLabel)
 
+    _createClock: (_id) =>
+      _xy = @_dom2Svg(_id, 0.5, 0, -0.5, 0)
+      _x = _xy.x
+      _y = _xy.y
+      _width = _xy.width
+      _height = _xy.height
+      @floorplanDevices[_id].xy = _xy 
+
+      _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
+      _colorHour = _format.colorHour ? "blue"
+      _colorMinute = _format.colorMinute ? "red"
+      _colorSecond = _format.colorSecond ? "green"
+      _strokeHour = _format.strokeHour ? 1
+      _strokeMinute = _format.strokeMinute ? 1
+      _strokeSecond = _format.strokeSecond ? 0.3
+      _lengthHour = _format.lengthHour ? 0.6
+      _lengthMinute = _format.lengthMinute ? 0.9
+      _lengthSecond = _format.lengthSecond ? 1
+      _dotSize = _format.dotSize ? 1
+      _dotColor = _format.dotColor ? "gray"
+
+      _hour = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      _hour.setAttribute('x1',_x)
+      _hour.setAttribute('y1',_y)
+      _hour.setAttribute('x2',_x)
+      _hour.setAttribute('y2',_y-(_height/2)*_lengthHour)
+      _hour.setAttribute('stroke',_colorHour)
+      _hour.setAttribute('stroke-width',_strokeHour)
+
+      _minute = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      _minute.setAttribute('x1',_x)
+      _minute.setAttribute('y1',_y)
+      _minute.setAttribute('x2',_x)
+      _minute.setAttribute('y2',_y-(_height/2)*_lengthMinute)
+      _minute.setAttribute('stroke',_colorMinute)
+      _minute.setAttribute('stroke-width',_strokeMinute)
+
+      _second = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+      _second.setAttribute('x1',_x)
+      _second.setAttribute('y1',_y)
+      _second.setAttribute('x2',_x)
+      _second.setAttribute('y2',_y-(_height/2)*_lengthSecond)
+      _second.setAttribute('stroke',_colorSecond)
+      _second.setAttribute('stroke-width',_strokeSecond)
+
+      @floorplanDevices[_id]["hour"] = _hour
+      @floorplanDevices[_id]["minute"] = _minute
+      @floorplanDevices[_id]["second"] = _second
+      _dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      _dot.setAttribute('r', _dotSize)
+      _dot.setAttribute('fill', _dotColor)
+      _dot.setAttribute('cx',_x)
+      _dot.setAttribute('cy',_y)
+
+      if _format.label?
+        _valueLabel = @_createText(_id, 0.5, 0, 0.05, 10, "black", @floorplanDevices[_id].name)
+        @floorplanDevices[_id]["label"] = _valueLabel
+        @svgRoot.appendChild(_valueLabel)
+
+      @svgRoot.appendChild(_hour)
+      @svgRoot.appendChild(_minute)
+      @svgRoot.appendChild(_second)
+      @svgRoot.appendChild(_dot)
+
+      @_clockTick(_id)
+
     _createCamera: (_id) =>
       _format = @floorplanDevices[_id].format if @floorplanDevices[_id].format?
       _url = _format.camera
-      _xy = @_dom2Svg(_id, 0, 0, -1, 0)
+      if @floorplanDevices[_id]["xy"]?
+        _xy = @floorplanDevices[_id]["xy"]
+      else
+        _xy = @_dom2Svg(_id, 0, 0, -1, 0)
+        @floorplanDevices[_id]["xy"] = _xy
+
       _image = document.createElementNS('http://www.w3.org/2000/svg', 'image')
       _image.setAttributeNS(null,'x',_xy.x)
       _image.setAttributeNS(null,'y',_xy.y)
@@ -383,6 +433,7 @@ $(document).on 'templateinit', (event) ->
 
       @floorplanDevices[_id]["camera"] = _image
       @svgRoot.appendChild(_image)
+      return _image
 
     _createCameraLabel: (_id) =>
       _valueLabel = @_createText(_id, 0.5, -20, 0.1, 0, "black")
@@ -443,7 +494,7 @@ $(document).on 'templateinit', (event) ->
       _curVal = ((Number @floorplanDevices[_id]["value"])-_min)*180/(_max-_min)
       _newVal = (value-_min)*180/(_max-_min)
 
-      _xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
+      _xy = @floorplanDevices[_id].xy #_xy = @_dom2Svg(_id, 0.5, 0, 0, 0)
       _line = @floorplanDevices[_id]["gauge"]
 
       _animateTransform = _line.childNodes[0]
@@ -455,6 +506,31 @@ $(document).on 'templateinit', (event) ->
       @floorplanDevices[_id]["value"] = Number value
 
       @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
+
+    _setClock: (_id, value) =>
+      return
+
+    _clockTick: (_id) =>
+      # value 0=360 -> 0-59 of 0-11/12-23
+      _date = new Date()
+      _newSecond =  _date.getSeconds()*6
+      _newMinute = _date.getMinutes()*6 + 0.1*_date.getSeconds()
+      _newHour =  _date.getHours()
+      if _newHour > 11 then _newHour -=12
+      _newHour = 30* _newHour + 0.5 * _date.getMinutes()
+
+      _xy = @floorplanDevices[_id].xy
+      _second = @floorplanDevices[_id]["second"]
+      _minute = @floorplanDevices[_id]["minute"]
+      _hour = @floorplanDevices[_id]["hour"]
+
+      _second.setAttribute('transform','rotate('+_newSecond+' '+_xy.x+' '+_xy.y+')')
+      _minute.setAttribute('transform','rotate('+_newMinute+' '+_xy.x+' '+_xy.y+')')
+      _hour.setAttribute('transform','rotate('+_newHour+' '+_xy.x+' '+_xy.y+')')
+
+      @floorplanDevices[_id]["clockTimer"] = setTimeout(=>
+        @_clockTick(_id)
+      , 1000)
 
     _setShutter: (_id, value) =>
       _isNumber = not Number.isNaN(value)
@@ -475,19 +551,25 @@ $(document).on 'templateinit', (event) ->
       @floorplanDevices[_id]['label'].innerHTML = @_sensorFullValue(_id,value)
 
     _setCamera: (_id, value) =>
-      _camera = @floorplanDevices[_id].camera
+
+      return
+
+      _camera = document.getElementById(_id)
       _label = @floorplanDevices[_id].name ? _id
-      #_url = @floorplanDevices[_id].format.camera
+      _url = @floorplanDevices[_id].format.camera
 
       if _camera?
         @svgRoot.removeChild(_camera)
       if Boolean value is true
-        #_camera.setAttributeNS(null,'href',_url)
-        @_createCamera(_id)
+        _camera = @_createCamera(_id)
+        @svgRoot.appendChild(_camera)
         @floorplanDevices[_id]["label"].innerHTML = _label
         @floorplanDevices[_id].state = true
+        if @panZoom?
+          @panZoom.destroy()
+        @panZoom = svgPanZoom(@svgRoot,{dblClickZoomEnabled:false})
       else
-        #_camera.setAttributeNS(null,'href',"leaf.png")
+        @floorplanDevices[_id].camera = null
         @floorplanDevices[_id]["label"].innerHTML = _label + " - OFF"
         @floorplanDevices[_id].state = false
 
@@ -542,7 +624,6 @@ $(document).on 'templateinit', (event) ->
         _offColor = @floorplanDevices[_id]["colorOff"]
         $(_tId, @svgRoot).attr('style',_offColor)
 
-
     _buttonOnOff: (_id, onoff) =>
       _tId = "#" + _id
       _offColor = @floorplanDevices[_id]["colorOff"]
@@ -595,9 +676,11 @@ $(document).on 'templateinit', (event) ->
             #if @floorplanDevices[_id]["bar"]? and @floorplanDevices[_id]["bar"]
             @_setBar(_id, newValue)
           when 'sensor_gauge'
-            t = "Sensor_gauge empty"
             @_setGauge(_id, Number newValue)
+          when 'clock'
+            @_setClock(_id, Number newValue)
           when 'camera'
+            return
             @_setCamera(_id,newValue)
             unless newValue
               document.location.reload()

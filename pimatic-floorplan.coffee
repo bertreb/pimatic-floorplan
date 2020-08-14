@@ -19,6 +19,7 @@ module.exports = (env) ->
         mobileFrontend = @framework.pluginManager.getPlugin 'mobile-frontend'
         if mobileFrontend?
           mobileFrontend.registerAssetFile 'js', 'pimatic-floorplan/ui/floorplan.coffee'
+          mobileFrontend.registerAssetFile 'js', 'pimatic-floorplan/ui/svg-pan-zoom.min.js'
           mobileFrontend.registerAssetFile 'css', 'pimatic-floorplan/ui/floorplan.css'
           mobileFrontend.registerAssetFile 'html', 'pimatic-floorplan/ui/floorplan.jade'
         else
@@ -88,9 +89,9 @@ module.exports = (env) ->
         # get and set all initial values
         _arrayAttributeValues = _.map(@attributeValues)
         Promise.all(_arrayAttributeValues.map (d) =>
-          for _action in d.remoteGetAction
-            _getter = 'get' + upperCaseFirst(_action)
-            if _getter?
+          if d.remoteGetAction?
+            for _action in d.remoteGetAction
+              _getter = 'get' + upperCaseFirst(_action)
               #env.logger.info "_getter; " + _getter
               switch d.type
                 when 'light'
@@ -102,6 +103,8 @@ module.exports = (env) ->
                 when 'sensor_bar'
                   getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
                 when 'sensor_gauge'
+                  getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
+                when 'clock'
                   getRemoteSensor(d.remoteDevice, d.attrName, d.remoteAttrName)
                 else
                   getRemote(d.remoteDevice,_getter, d.attrName,_action)
@@ -165,6 +168,9 @@ module.exports = (env) ->
                   if attrEvent.attributeName is _remoteDevice.remoteAttrName
                     @setLocalSensor(_attr, attrEvent.value)
                 when "camera"
+                  if attrEvent.attributeName is _remoteDevice.remoteAttrName
+                    @setLocalState(_attr, attrEvent.value)
+                when "clock"
                   if attrEvent.attributeName is _remoteDevice.remoteAttrName
                     @setLocalState(_attr, attrEvent.value)
 
@@ -249,6 +255,13 @@ module.exports = (env) ->
                   type: _deviceAttrType
                 )
               when "sensor_gauge"
+                _attrName = _device.svgId
+                _deviceAttrType = "string"
+                @addAttribute(_attrName,
+                  description: "remote device " + _attrName ? ""
+                  type: _deviceAttrType
+                )
+              when "clock"
                 _attrName = _device.svgId
                 _deviceAttrType = "string"
                 @addAttribute(_attrName,
@@ -357,6 +370,14 @@ module.exports = (env) ->
             remoteSetAction: null
           @_createGetter attrName, () =>
             return Promise.resolve @attributeValues[attrName].state.sensor
+        when "clock"
+          @attributeValues[attrName] =
+            state:
+              sensor: @lastState?[attrName]?.value ? ""
+            remoteGetAction: null #[remoteAttrName]
+            remoteSetAction: null
+          @_createGetter attrName, () =>
+            return Promise.resolve @attributeValues[attrName].state.sensor #clock type value
         when "camera"
           @attributeValues[attrName] =
             state:

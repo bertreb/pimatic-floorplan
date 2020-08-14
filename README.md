@@ -13,8 +13,8 @@ This plugin adds a gui option to create 1 or more floorplan devices, for viewing
 - Scalable Vector Graphics (svg) as graphical base for a floorplan.
 - Manual adding of devices that must be shown on the floorplan.
 - Free choice of shapes for background and the pimatic devices, as long as they are linked to pimatic (see Linking the floorplan svg and pimatic).
-- The supported devices are: switch, presence, contact, light, button, sensor (text/value display), sensor_bar, sensor_gauge and camera.
-- The states of an on/off switch, open/close contact, light, push/release button and present/absent presence sensor are all presented via colors. The colors are configurable. The light  will color depending on the color of the device its connected to.
+- The supported devices are: switch, presence, contact, light, button, sensor (text/value display), sensor_bar, sensor_gauge, clock and camera.
+- The states of an on/off switch, open/close contact, light, push/release button and present/absent presence sensor are all presented via colors. The colors are configurable. The light  will color depending on the color settings of the device its linked to.
 - Attribute values can be shown via the sensor field. Optional you can add the acronym and unit of the used device.
 
 ## Preparation
@@ -89,14 +89,26 @@ Below a gauge example.
 
 ![](assets/gauge.png)
 
+#### Clock
+The clock will show a analogue clock on any image or drawing. In the svg create the clock background. The second, minute and hour hands are automatically created. 
+In the device config format field, you can set the color, lenght and width of the hands. {'colorHour':'\<colorname or hex>','hourLenght':\<number>, 'hourStroke':\<number>}. If the label option is set to true ({'label':true}, the label with the clock name is automatically created. There's no label if the label option is absent or label is set to false.
+
+Below a clock example.
+
+![](assets/clock.png)
+
+
 #### Camera
-The camera will show an network stream (or image). In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
+The camera will show a network stream (or image). In the svg create a RECT with the width/height ratio compatible with the image or stream (mostly 16:9). 
 In the device config format field, you must set the url of the image or stream {'camera':'http://.......'}. The pimatic-device and attribute is used for switching the camera on and off. Use a pimatic switch device for that. The label with the camera name is automatically created.
 
 Below a camera example.
 
 ![](assets/camera.png)
 
+## Pan Zoom
+
+A floorplan can be zoomed or panned. With a double click you go back to the startup fitted floorplan.
 
 ---
 The plugin is in development. You could backup Pimatic before you are using this plugin!
