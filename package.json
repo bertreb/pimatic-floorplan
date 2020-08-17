@@ -28,7 +28,7 @@
     "ui/floorplan.coffee",
     "ui/floorplan.css",
     "ui/floorplan.jade",
-
+    "ui/SVGPanZoom.min.js"
   ],
   "configSchema": "pimatic-floorplan-config-schema.coffee",
   "dependencies": {
