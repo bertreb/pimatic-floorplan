@@ -13,7 +13,7 @@
     "gui",
     "floorplan"
   ],
-  "version": "0.2.12",
+  "version": "0.2.13",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bertreb/pimatic-floorplan.git"
@@ -28,7 +28,7 @@
     "ui/floorplan.coffee",
     "ui/floorplan.css",
     "ui/floorplan.jade",
-    "ui/SVGPanZoom.min.js"
+    "ui/svg-pan-zoom.min.js"
   ],
   "configSchema": "pimatic-floorplan-config-schema.coffee",
   "dependencies": {
