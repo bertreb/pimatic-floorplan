@@ -21,21 +21,17 @@ $(document).on 'templateinit', (event) ->
         #  @floorplanDevices[_dev.svgId]["colorOff"] = 'fill:#cccccc'
 
 
-
     getItemTemplate: => 'floorplan'
 
     afterRender: (elements) =>
       super(elements)
       ### Apply UI elements ###
 
-
-
       a = document.getElementById(@id)
       a.addEventListener("load",() =>
         svgDoc = a.contentDocument #get the inner DOM of alpha.svg
         @svgRoot = svgDoc.documentElement
-
-        
+       
         #$(@svgRoot).on("click", (e)=>
         #  @panZoom.zoomIn()
         #  #@panZoom.fit()
@@ -153,9 +149,9 @@ $(document).on 'templateinit', (event) ->
                 @_createCamera(_id)
                 @_createCameraLabel(_id)
                 @_setCamera(_id,attribute.value())
-                @_onRemoteStateChange _id                
+                @_onRemoteStateChange _id
 
-        @panZoom = svgPanZoom(@svgRoot, {dblClickZoomEnabled:false, preventMouseEventsDefault:false, zoomScaleSensitivity:0.5})
+        @panZoom = svgPanZoom(@svgRoot, {dblClickZoomEnabled:false, preventMouseEventsDefault:false, zoomScaleSensitivity:0.3})
 
       )
 

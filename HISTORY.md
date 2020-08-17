@@ -12,3 +12,5 @@
 	* added bar, gauge and shutter
 * 20200805, v0.2.10
 	* added camera
+* 20200817, v0.2.12
+	* added pan-zoom
